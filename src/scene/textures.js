@@ -229,12 +229,12 @@ export function whiteboardTexture() {
 	return texture(c);
 }
 
-function screenFrame(g, w, h, title) {
-	g.fillStyle = '#f7f8f8';
+function screenFrame(g, w, h, title, dark = false) {
+	g.fillStyle = dark ? '#0b1316' : '#f7f8f8';
 	g.fillRect(0, 0, w, h);
-	g.fillStyle = '#e4e8e9';
+	g.fillStyle = dark ? '#132329' : '#e4e8e9';
 	g.fillRect(0, 0, w, 44);
-	g.fillStyle = PALETTE.teal;
+	g.fillStyle = dark ? PALETTE.tealSoft : PALETTE.teal;
 	g.font = `20px ${MONO}`;
 	g.fillText(title, 24, 29);
 	g.fillStyle = PALETTE.peach;
@@ -319,19 +319,19 @@ export function terminalScreen() {
 	const total = script.reduce((a, [, s]) => a + s.length + 8, 0);
 	let last = '';
 	function draw(chars, blink) {
-		screenFrame(g, 1024, 768, 'foot — ~/sunshine-hyprland-virtual-display');
+		screenFrame(g, 1024, 768, 'foot — ~/sunshine-hyprland-virtual-display', true);
 		g.font = `26px ${MONO}`;
 		let left = chars;
 		let y = 100;
 		for (const [prompt, text] of script) {
 			if (left <= 0) break;
 			const shown = prompt ? text.slice(0, Math.max(0, left)) : left >= text.length ? text : '';
-			g.fillStyle = PALETTE.amber;
+			g.fillStyle = PALETTE.peach;
 			g.fillText(prompt, 30, y);
-			g.fillStyle = prompt ? PALETTE.ink : text.startsWith('[info]') ? PALETTE.teal : '#5d7178';
+			g.fillStyle = prompt ? '#e2f6fa' : text.startsWith('[info]') ? '#6fe0d2' : '#8fb3bd';
 			g.fillText(shown, 30 + g.measureText(prompt).width, y);
 			if (blink && (left < text.length + 8 || !text)) {
-				g.fillStyle = PALETTE.teal;
+				g.fillStyle = '#6fe0d2';
 				g.fillRect(30 + g.measureText(prompt + shown).width + 4, y - 22, 14, 28);
 			}
 			left -= text.length + 8;

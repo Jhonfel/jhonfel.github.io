@@ -24,6 +24,7 @@ import {
 	RingGeometry,
 	MeshPhysicalNodeMaterial,
 } from 'three/webgpu';
+import { texture, uv, time, sin, fract, smoothstep, float, vec3, luminance, hash, floor, step, color } from 'three/tsl';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { PALETTE, laptopScreen, terminalScreen, whiteboardTexture, phoneScreen, rng } from './textures.js';
 
@@ -42,6 +43,22 @@ const M = {
 	chrome: mat('#e3e8ea', 0.1, 1),
 	darkChrome: mat('#8b979c', 0.2, 1),
 };
+
+// Monitor screen as a small TSL shader: scanlines, a slow band rolling down, a touch of flicker,
+// darker corners, and bright text pushed above 1.0 so the bloom pass gives it a phosphor glow.
+function crtMaterial(map) {
+	const m = new MeshStandardNodeMaterial({ roughness: 0.3 });
+	const tex = texture(map, uv());
+	const scan = sin(uv().y.mul(Math.PI * 2 * 150)).mul(0.5).add(0.5).mul(0.3).add(0.7);
+	const band = smoothstep(0.93, 1.0, fract(uv().y.add(time.mul(0.13)))).mul(0.1);
+	const flicker = sin(time.mul(113.0)).mul(0.015).add(0.985);
+	const d = uv().sub(0.5).length();
+	const vignette = float(1).sub(d.mul(d).mul(1.1));
+	const phosphor = tex.rgb.mul(float(1).add(luminance(tex.rgb).pow(2).mul(1.4)));
+	m.colorNode = vec3(0);
+	m.emissiveNode = phosphor.mul(scan).mul(vignette).mul(flicker).add(band);
+	return m;
+}
 
 function screenMaterial(map, intensity = 1) {
 	return new MeshStandardNodeMaterial({ color: '#000', roughness: 0.25, emissive: '#fff', emissiveMap: map, emissiveIntensity: intensity });
@@ -147,7 +164,7 @@ function monitor() {
 	body.add(mesh(rbox(0.26, 0.018, 0.18, 0.008), M.clay, { pos: [0, 0.009, 0] }));
 	body.add(mesh(rbox(0.05, 0.3, 0.03, 0.01), M.clay, { pos: [0, 0.16, -0.04] }));
 	body.add(mesh(rbox(0.76, 0.5, 0.03, 0.014), M.clay, { pos: [0, 0.48, -0.01] }));
-	body.add(mesh(new PlaneGeometry(0.72, 0.46), screenMaterial(screen.texture), { pos: [0, 0.48, 0.0055], shadow: false }));
+	body.add(mesh(new PlaneGeometry(0.72, 0.46), crtMaterial(screen.texture), { pos: [0, 0.48, 0.0055], shadow: false }));
 	body.add(mesh(new BoxGeometry(0.1, 0.006, 0.002), M.peach, { pos: [0, 0.244, 0.006], shadow: false }));
 
 	let tilt = 0; // radians, positive = leaning back
@@ -478,21 +495,27 @@ export function nixieClock() {
 	const xs = [-0.135, -0.093, -0.023, 0.019, 0.089, 0.131];
 	for (const x of xs) {
 		const d = nixieDigit();
+		// each tube flickers on its own, with the odd dip, like real neon
+		const seed = digits.length * 17.3;
+		const jitter = hash(floor(time.mul(24.0)).add(seed)).mul(0.14).add(0.86);
+		const dip = step(0.992, hash(floor(time.mul(7.0)).add(seed))).mul(0.55);
+		const flick = jitter.mul(float(1).sub(dip));
 		const face = new MeshStandardNodeMaterial({
 			color: '#000',
-			emissive: '#fff',
-			emissiveMap: d.tex,
-			emissiveIntensity: 4.5,
 			transparent: true,
 			blending: AdditiveBlending,
 			depthWrite: false,
 		});
+		face.emissiveNode = texture(d.tex, uv()).rgb.mul(4.5).mul(flick);
+		// faint orange halo inside the glass, following the same flicker
+		const tubeGlass = glass.clone();
+		tubeGlass.emissiveNode = color('#ff7a2a').mul(0.05).mul(flick);
 		g.add(mesh(new CylinderGeometry(0.0175, 0.0175, 0.006, 24), M.chrome, { pos: [x, 0.031, 0] }));
 		// dark anode mesh behind the cathodes, so the orange glow has something to read against
 		g.add(mesh(new CylinderGeometry(0.0165, 0.0165, 0.056, 24, 1, true, Math.PI / 2, Math.PI), anode, { pos: [x, 0.064, 0], shadow: false }));
 		g.add(mesh(new PlaneGeometry(0.026, 0.044), face, { pos: [x, 0.062, 0.002], shadow: false }));
-		g.add(mesh(new CylinderGeometry(0.017, 0.017, 0.07, 24, 1, true), glass, { pos: [x, 0.069, 0], shadow: false }));
-		g.add(mesh(new SphereGeometry(0.017, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), glass, { pos: [x, 0.104, 0], shadow: false }));
+		g.add(mesh(new CylinderGeometry(0.017, 0.017, 0.07, 24, 1, true), tubeGlass, { pos: [x, 0.069, 0], shadow: false }));
+		g.add(mesh(new SphereGeometry(0.017, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), tubeGlass, { pos: [x, 0.104, 0], shadow: false }));
 		g.add(mesh(new SphereGeometry(0.003, 8, 6), glass, { pos: [x, 0.123, 0], shadow: false }));
 		digits.push(d);
 	}
