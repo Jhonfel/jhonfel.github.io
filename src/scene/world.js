@@ -32,7 +32,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { PALETTE, tileTexture, hudWallTexture, rng } from './textures.js';
 import { createArm } from './arm.js';
-import { BUILDERS, metalUpa } from './objects.js';
+import { BUILDERS, metalUpa, nixieClock } from './objects.js';
 
 const HOME = { pos: new Vector3(-0.2, 1.45, 2.95), look: new Vector3(-0.22, 0.3, -0.2) };
 const BENCH = { w: 3.5, d: 1.55, top: 0 };
@@ -176,12 +176,15 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 		scene.add(item.group);
 		items.push(item);
 	}
-	const upa = metalUpa();
-	upa.group.traverse((o) => (o.userData.section = 'upa'));
-	scene.add(upa.group);
+	// decorative props: clickable, but they don't open a section
+	const props = { upa: metalUpa(), nixie: nixieClock() };
+	for (const [id, prop] of Object.entries(props)) {
+		prop.group.traverse((o) => (o.userData.section = id));
+		scene.add(prop.group);
+	}
 	scene.updateMatrixWorld(true);
 	for (const item of items) item.center.set(...item.view.look);
-	const pickables = [...items.map((i) => i.group), upa.group];
+	const pickables = [...items.map((i) => i.group), ...Object.values(props).map((p) => p.group)];
 
 	// ---------------------------------------------------------------- post
 	const pipeline = new RenderPipeline(renderer);
@@ -306,9 +309,9 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 		pointer.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
 		const hit = pick();
 		const id = hit?.object.userData.section;
-		if (id === 'upa') {
-			upa.poke();
-			burst(hit.point, 60);
+		if (props[id]) {
+			props[id].poke();
+			burst(hit.point, 40);
 		} else onSelect(id ?? null);
 	});
 
@@ -340,7 +343,7 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 		arm.update(dt, t);
 
 		for (const item of items) item.update?.(t, dt);
-		upa.update(t, dt);
+		for (const prop of Object.values(props)) prop.update(t, dt);
 
 		// pixels
 		for (let i = 0; i < PIX; i++) {

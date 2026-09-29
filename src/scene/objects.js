@@ -12,6 +12,9 @@ import {
 	CatmullRomCurve3,
 	MeshStandardNodeMaterial,
 	TextureLoader,
+	CanvasTexture,
+	AdditiveBlending,
+	DoubleSide,
 	SRGBColorSpace,
 	Vector3,
 	Color,
@@ -134,7 +137,7 @@ function monitor() {
 	g.add(mesh(new BoxGeometry(0.1, 0.006, 0.002), M.peach, { pos: [0, 0.244, 0.006], shadow: false }));
 	return {
 		group: place(g, [0.88, 0, -0.52], -0.3),
-		view: { pos: [1.08, 0.72, 0.78], look: [0.86, 0.45, -0.52] },
+		view: { pos: [1.06, 0.62, 0.8], look: [0.86, 0.36, -0.5] },
 		update: (t) => screen.update(t),
 	};
 }
@@ -276,6 +279,111 @@ function samibot() {
 			g.position.set(center.x + Math.sin(a) * 0.07, 0, center.z + Math.cos(a) * 0.12);
 			g.rotation.y = Math.atan2(Math.cos(a) * 0.07, -Math.sin(a) * 0.12);
 			body.rotation.z = Math.sin(t * 6) * 0.004;
+		},
+	};
+}
+
+// Nixie clock at the foot of the monitor, like the one under my real screen. Shows the visitor's local time;
+// clicking it runs the digit cycle real nixie clocks use against cathode poisoning.
+function nixieDigit() {
+	const c = document.createElement('canvas');
+	c.width = 96;
+	c.height = 160;
+	const g = c.getContext('2d');
+	const tex = new CanvasTexture(c);
+	tex.colorSpace = SRGBColorSpace;
+	let shown = null;
+	return {
+		tex,
+		set(d) {
+			if (d === shown) return;
+			shown = d;
+			g.clearRect(0, 0, 96, 160);
+			g.fillStyle = '#000';
+			g.fillRect(0, 0, 96, 160);
+			g.font = '300 128px Jost, sans-serif';
+			g.textAlign = 'center';
+			g.textBaseline = 'middle';
+			g.lineWidth = 3;
+			// the unlit cathodes stacked behind
+			g.strokeStyle = 'rgba(255,140,60,.1)';
+			for (const n of '0123456789') g.strokeText(n, 48, 84);
+			// the lit one
+			g.shadowColor = '#ff6a1a';
+			g.shadowBlur = 14;
+			g.strokeStyle = '#ff7f30';
+			g.lineWidth = 6;
+			g.strokeText(d, 48, 84);
+			g.shadowBlur = 0;
+			g.strokeStyle = '#ffc89a';
+			g.lineWidth = 2;
+			g.strokeText(d, 48, 84);
+			tex.needsUpdate = true;
+		},
+	};
+}
+
+export function nixieClock() {
+	const g = new Group();
+	g.scale.setScalar(1.4);
+	const glass = new MeshStandardNodeMaterial({ color: '#e8d9c8', roughness: 0.04, metalness: 0, transparent: true, opacity: 0.3, depthWrite: false });
+	const anode = mat('#120d0b', 0.85, 0, { side: DoubleSide });
+	const neon = new MeshStandardNodeMaterial({ color: '#000', emissive: '#ff7a2a', emissiveIntensity: 3 });
+	g.add(mesh(rbox(0.34, 0.028, 0.075, 0.008), M.clay, { pos: [0, 0.014, 0] }));
+	g.add(mesh(new BoxGeometry(0.3, 0.004, 0.002), M.teal, { pos: [0, 0.014, 0.0385], shadow: false }));
+
+	const digits = [];
+	const xs = [-0.135, -0.093, -0.023, 0.019, 0.089, 0.131];
+	for (const x of xs) {
+		const d = nixieDigit();
+		const face = new MeshStandardNodeMaterial({
+			color: '#000',
+			emissive: '#fff',
+			emissiveMap: d.tex,
+			emissiveIntensity: 4.5,
+			transparent: true,
+			blending: AdditiveBlending,
+			depthWrite: false,
+		});
+		g.add(mesh(new CylinderGeometry(0.0175, 0.0175, 0.006, 24), M.chrome, { pos: [x, 0.031, 0] }));
+		// dark anode mesh behind the cathodes, so the orange glow has something to read against
+		g.add(mesh(new CylinderGeometry(0.0165, 0.0165, 0.056, 24, 1, true, Math.PI / 2, Math.PI), anode, { pos: [x, 0.064, 0], shadow: false }));
+		g.add(mesh(new PlaneGeometry(0.026, 0.044), face, { pos: [x, 0.062, 0.002], shadow: false }));
+		g.add(mesh(new CylinderGeometry(0.017, 0.017, 0.07, 24, 1, true), glass, { pos: [x, 0.069, 0], shadow: false }));
+		g.add(mesh(new SphereGeometry(0.017, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), glass, { pos: [x, 0.104, 0], shadow: false }));
+		g.add(mesh(new SphereGeometry(0.003, 8, 6), glass, { pos: [x, 0.123, 0], shadow: false }));
+		digits.push(d);
+	}
+	const colons = [];
+	for (const x of [-0.058, 0.054])
+		for (const y of [0.05, 0.072]) {
+			const dot = mesh(new SphereGeometry(0.0035, 12, 8), neon, { pos: [x, y, 0], shadow: false });
+			g.add(dot);
+			colons.push(dot);
+		}
+
+	let cycleUntil = -1;
+	let clock = 0;
+	const pad = (n) => String(n).padStart(2, '0');
+	return {
+		group: place(g, [0.82, 0, -0.33], -0.3),
+		poke() {
+			cycleUntil = clock + 2.2;
+		},
+		update(t) {
+			clock = t;
+			if (t < cycleUntil) {
+				// every tube walks through its cathodes, tubes slightly out of phase
+				const step = Math.floor(t * 18);
+				digits.forEach((d, i) => d.set(String((step + i * 3) % 10)));
+				colons.forEach((c) => (c.visible = true));
+				return;
+			}
+			const now = new Date();
+			const str = pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
+			digits.forEach((d, i) => d.set(str[i]));
+			const on = now.getMilliseconds() < 500;
+			colons.forEach((c) => (c.visible = on));
 		},
 	};
 }

@@ -96,6 +96,11 @@ addEventListener('pointermove', (e) => {
 	tag.style.top = `${pointer[1]}px`;
 });
 
+const PROPS = {
+	upa: { en: 'Metal Upa', es: 'Metal Upa' },
+	nixie: { en: 'Nixie clock', es: 'Reloj nixie' },
+};
+
 function onHover(id) {
 	const i = SECTIONS.findIndex((s) => s.id === id);
 	for (const b of $('nav').querySelectorAll('button')) b.classList.toggle('hover', b.dataset.id === id);
@@ -103,8 +108,8 @@ function onHover(id) {
 	if (i >= 0 && id !== current && !coarse) {
 		tag.innerHTML = `<b>${num(i)}</b>${SECTIONS[i][lang].label}`;
 		tag.hidden = false;
-	} else if (id === 'upa' && !coarse) {
-		tag.innerHTML = '<b>??.</b>Metal Upa';
+	} else if (PROPS[id] && !coarse) {
+		tag.innerHTML = `<b>??.</b>${PROPS[id][lang]}`;
 		tag.hidden = false;
 	} else tag.hidden = true;
 }
