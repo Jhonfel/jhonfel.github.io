@@ -20,6 +20,7 @@ import {
 	SRGBColorSpace,
 	Vector3,
 	Color,
+	Matrix4,
 } from 'three/webgpu';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { PALETTE, laptopScreen, terminalScreen, whiteboardTexture, phoneScreen, rng } from './textures.js';
@@ -132,15 +133,49 @@ function books() {
 function monitor() {
 	const g = new Group();
 	const screen = terminalScreen();
-	g.add(mesh(rbox(0.26, 0.018, 0.18, 0.008), M.clay, { pos: [0, 0.009, 0] }));
-	g.add(mesh(rbox(0.05, 0.3, 0.03, 0.01), M.clay, { pos: [0, 0.16, -0.04] }));
-	g.add(mesh(rbox(0.76, 0.5, 0.03, 0.014), M.clay, { pos: [0, 0.48, -0.01] }));
-	g.add(mesh(new PlaneGeometry(0.72, 0.46), screenMaterial(screen.texture), { pos: [0, 0.48, 0.0055], shadow: false }));
-	g.add(mesh(new BoxGeometry(0.1, 0.006, 0.002), M.peach, { pos: [0, 0.244, 0.006], shadow: false }));
+	// Everything sits on a rocker hinged at the back edge of the stand, so the arm can knock it back
+	// and it springs forward again.
+	const HINGE_Z = -0.09;
+	const rocker = new Group();
+	rocker.position.z = HINGE_Z;
+	g.add(rocker);
+	const body = new Group();
+	body.position.z = -HINGE_Z;
+	rocker.add(body);
+	body.add(mesh(rbox(0.26, 0.018, 0.18, 0.008), M.clay, { pos: [0, 0.009, 0] }));
+	body.add(mesh(rbox(0.05, 0.3, 0.03, 0.01), M.clay, { pos: [0, 0.16, -0.04] }));
+	body.add(mesh(rbox(0.76, 0.5, 0.03, 0.014), M.clay, { pos: [0, 0.48, -0.01] }));
+	body.add(mesh(new PlaneGeometry(0.72, 0.46), screenMaterial(screen.texture), { pos: [0, 0.48, 0.0055], shadow: false }));
+	body.add(mesh(new BoxGeometry(0.1, 0.006, 0.002), M.peach, { pos: [0, 0.244, 0.006], shadow: false }));
+
+	let tilt = 0; // radians, positive = leaning back
+	let spin = 0;
+	const inv = new Matrix4();
+	const p = new Vector3();
 	return {
 		group: place(g, [0.88, 0, -0.52], -0.3),
 		view: { pos: [1.06, 0.62, 0.8], look: [0.86, 0.36, -0.5] },
-		update: (t) => screen.update(t),
+		/** world points of the arm; returns how deep the deepest one is inside the screen (m) */
+		collide(points) {
+			inv.copy(g.matrixWorld).invert();
+			let depth = 0;
+			for (const wp of points) {
+				p.copy(wp).applyMatrix4(inv);
+				// screen panel (front face near z = 0.005), padded by the arm's thickness
+				if (Math.abs(p.x) < 0.42 && p.y > 0.2 && p.y < 0.76 && p.z < 0.055 && p.z > -0.06) depth = Math.max(depth, 0.055 - p.z);
+			}
+			if (depth > 0) spin += Math.min(depth, 0.08) * 45;
+			return depth;
+		},
+		update(t, dt) {
+			screen.update(t);
+			// damped spring back to upright, with a hard stop so it can't tip over
+			spin += (-140 * tilt - 5 * spin) * dt;
+			tilt += spin * dt;
+			if (tilt > 0.35) (tilt = 0.35), (spin = -Math.abs(spin) * 0.4);
+			if (tilt < -0.06) (tilt = -0.06), (spin = Math.abs(spin) * 0.3);
+			rocker.rotation.x = -tilt;
+		},
 	};
 }
 

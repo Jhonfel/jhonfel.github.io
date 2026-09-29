@@ -55,6 +55,7 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 	scene.environmentIntensity = 0.35;
 
 	const camera = new PerspectiveCamera(38, 1, 0.05, 40);
+	scene.userData.camera = camera; // camera-facing particles read it
 
 	// ---------------------------------------------------------------- lights
 	// White key light + teal ground bounce: shadows come out teal, like the RE:BOOT opening.
@@ -184,6 +185,7 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 	}
 	scene.updateMatrixWorld(true);
 	for (const item of items) item.center.set(...item.view.look);
+	const monitorItem = items.find((i) => i.collide);
 	// objects on the bench that aren't tied to a section
 	for (const name of ['stethoscope']) if (!sections.some((s) => s.object === name)) scene.add(BUILDERS[name]().group);
 	const pickables = [...items.map((i) => i.group), ...Object.values(props).map((p) => p.group)];
@@ -279,6 +281,10 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 	let lastMove = -10;
 	const ray = new Raycaster();
 	const aimPlane = new Plane(new Vector3(0, 1, 0), -0.3);
+	const benchPlane = new Plane(new Vector3(0, 1, 0), 0);
+	// somewhere on the bench top the arm can reach, away from its own base
+	const onBench = (p) =>
+		Math.abs(p.x) < BENCH.w / 2 - 0.05 && Math.abs(p.z) < BENCH.d / 2 - 0.05 && p.distanceTo(arm.object.position) > 0.3 && p.distanceTo(arm.object.position) < 0.9;
 	const planeHit = new Vector3();
 	let hovered = null;
 	let hoverPoint = new Vector3();
@@ -336,19 +342,25 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 
 		const hit = pointerActive ? pick() : null;
 
-		// arm: point at hovered object, else follow the pointer on a plane above the bench, else idle
-		if (hit && hovered) arm.aim(hoverPoint, true);
+		// arm: point at a hovered object; over the bench, reach down and touch it (and strain if you
+		// keep it there); elsewhere follow the pointer on a plane above the bench; otherwise idle
+		if (hit && hovered) arm.aim(hoverPoint, 'point');
 		else if (focused) {
 			// gesture towards the open object without reaching into the camera's view
 			gesture.copy(focused.center).sub(arm.object.position).setY(0).setLength(0.32).add(arm.object.position).setY(0.42);
-			arm.aim(gesture, false);
-		}
-		else if (pointerActive && t - lastMove < 4 && ray.ray.intersectPlane(aimPlane, planeHit)) arm.aim(planeHit, false);
+			arm.aim(gesture, 'free');
+		} else if (pointerActive && t - lastMove < 6 && ray.ray.intersectPlane(benchPlane, planeHit) && onBench(planeHit)) arm.aim(planeHit, 'touch');
+		else if (pointerActive && t - lastMove < 4 && ray.ray.intersectPlane(aimPlane, planeHit)) arm.aim(planeHit, 'free');
 		else {
 			idleTarget.set(0.18 + Math.sin(t * 0.35) * 0.55, 0.28 + Math.sin(t * 0.7) * 0.08, -0.05 + Math.cos(t * 0.35) * 0.4);
-			arm.aim(idleTarget, false);
+			arm.aim(idleTarget, 'free');
 		}
 		arm.update(dt, t);
+		// the monitor is solid: if the arm runs into it, the monitor rocks back and knocks the arm away
+		if (monitorItem) {
+			const depth = monitorItem.collide(arm.points());
+			if (depth > 0 && arm.bump(-1)) burst(arm.points()[4], 12);
+		}
 
 		for (const item of items) item.update?.(t, dt);
 		for (const prop of Object.values(props)) prop.update(t, dt);
