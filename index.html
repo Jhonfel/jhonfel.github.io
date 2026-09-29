@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Jhon Felipe Delgado</title>
+		<meta name="description" content="Jhon Felipe Delgado — ML Engineer at MercadoLibre, occasional professor and PhD student at Universidad Nacional de Colombia. An interactive mechatronics workbench built with WebGPU." />
+		<meta name="theme-color" content="#eceeef" />
+		<meta property="og:title" content="Jhon Felipe Delgado" />
+		<meta property="og:description" content="ML Engineer · Mechatronics · PhD student. An interactive WebGPU workbench." />
+		<meta property="og:image" content="https://jhonfel.github.io/img/og.jpg" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+		<link rel="stylesheet" href="/src/style.css" />
+	</head>
+	<body>
+		<canvas id="scene" aria-hidden="true"></canvas>
+
+		<header class="brand neu">
+			<img src="/img/jhon.jpeg" alt="" width="44" height="44" />
+			<div>
+				<h1>Jhon Felipe Delgado</h1>
+				<p data-i18n="role"></p>
+			</div>
+		</header>
+
+		<div class="top-right">
+			<span class="badge neu-inset" id="renderer" hidden></span>
+			<button class="neu pill" id="lang" type="button"></button>
+		</div>
+
+		<nav class="sections" aria-labelledby="nav-title">
+			<h2 id="nav-title" class="sr-only" data-i18n="sections"></h2>
+			<ol id="nav"></ol>
+		</nav>
+
+		<p class="hint" id="hint"></p>
+		<div class="tag" id="tag" hidden></div>
+
+		<aside class="panel neu" id="panel" aria-live="polite" hidden>
+			<button class="neu pill back" id="back" type="button"></button>
+			<span class="num" id="panel-num"></span>
+			<h2 id="panel-title"></h2>
+			<div class="body" id="panel-body"></div>
+		</aside>
+
+		<div class="loader" id="loader">
+			<div class="pix"><i></i><i></i><i></i><i></i></div>
+			<p data-i18n="loading"></p>
+		</div>
+
+		<noscript>
+			<main class="plain">
+				<h1>Jhon Felipe Delgado</h1>
+				<p>ML Engineer at MercadoLibre, occasional professor and PhD student at Universidad Nacional de Colombia.</p>
+				<p><a href="https://github.com/Jhonfel">GitHub</a> · <a href="https://www.linkedin.com/in/jhon-felipe-delgado-salazar-732427161">LinkedIn</a></p>
+			</main>
+		</noscript>
+
+		<script type="module" src="/src/main.js"></script>
+	</body>
+</html>
