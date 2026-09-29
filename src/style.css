@@ -611,3 +611,14 @@ body.no3d .panel {
 	box-shadow: var(--neu-sm);
 	object-fit: cover;
 }
+
+.panel .projects span + span {
+	margin-top: 8px;
+	color: var(--ink);
+}
+
+.panel .pubs a {
+	font-family: var(--sans);
+	font-size: 0.95rem;
+	line-height: 1.4;
+}

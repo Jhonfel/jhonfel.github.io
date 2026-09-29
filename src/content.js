@@ -116,7 +116,15 @@ export const SECTIONS = [
 			body: `
 				<p>I’m doing my PhD at Universidad Nacional de Colombia, after finishing my Master’s in
 				Systems and Computing Engineering there.</p>
-				<p>Machine learning and NLP are where most of my reading goes, which explains the stack of books.</p>`,
+				<p>Machine learning and NLP are where most of my reading goes, which explains the stack of books.</p>
+				<h3>Publications</h3>
+				<ul class="projects pubs">
+					<li><a href="https://academic.oup.com/ajrccm/article/211/Supplement_1/A3651/8333097" target="_blank" rel="noopener">Comparison of Prediction Equations for Impulse Oscillometry: An AI-based Tool for Assisted Clinical Report</a>
+					<span>C. Zhang, <strong>J.F. Delgado Salazar</strong>, L.F. Guantiva Vargas, C.E. Rodriguez-Martinez, S.M. Restrepo Gualteros.
+					<em>Am J Respir Crit Care Med</em> 211 (Suppl. 1), A3651. ATS 2025 International Conference, San Francisco.</span>
+					<span>A support tool for pediatric pulmonology: it compares 10 prediction equations for impulse oscillometry in children aged 3–18
+					and uses an agentic LLM workflow to draft the clinical report, with the recommended equation and diagnostic hypotheses.</span></li>
+				</ul>`,
 		},
 		es: {
 			label: 'Investigación',
@@ -124,7 +132,16 @@ export const SECTIONS = [
 			body: `
 				<p>Estoy haciendo el doctorado en la Universidad Nacional de Colombia, después de terminar allí la
 				Maestría en Ingeniería de Sistemas y Computación.</p>
-				<p>Machine learning y NLP es a donde se va casi toda mi lectura, lo que explica la pila de libros.</p>`,
+				<p>Machine learning y NLP es a donde se va casi toda mi lectura, lo que explica la pila de libros.</p>
+				<h3>Publicaciones</h3>
+				<ul class="projects pubs">
+					<li><a href="https://academic.oup.com/ajrccm/article/211/Supplement_1/A3651/8333097" target="_blank" rel="noopener">Comparison of Prediction Equations for Impulse Oscillometry: An AI-based Tool for Assisted Clinical Report</a>
+					<span>C. Zhang, <strong>J.F. Delgado Salazar</strong>, L.F. Guantiva Vargas, C.E. Rodriguez-Martinez, S.M. Restrepo Gualteros.
+					<em>Am J Respir Crit Care Med</em> 211 (Suppl. 1), A3651. ATS 2025 International Conference, San Francisco.</span>
+					<span>Una herramienta de apoyo para neumología pediátrica: compara 10 ecuaciones de referencia de oscilometría de impulso
+					en niños de 3 a 18 años y usa un flujo agéntico con LLMs para redactar el reporte clínico, con la ecuación recomendada
+					y las hipótesis diagnósticas.</span></li>
+				</ul>`,
 		},
 	},
 	{
