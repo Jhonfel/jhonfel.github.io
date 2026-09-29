@@ -945,7 +945,7 @@ export function cds() {
 
 	let spin = 0;
 	return {
-		group: place(g, [-1.02, 0, 0.56], 0.12),
+		group: place(g, [-1.52, 0, 0.55], 0.12),
 		poke() {
 			spin = 40;
 		},
