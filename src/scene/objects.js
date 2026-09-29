@@ -606,17 +606,45 @@ export function skateboard() {
 		g.add(truck);
 	}
 	// rest on the tips of the kicktails
-	g.position.set(0.1, -0.78 + T / 2 + (L / 2 - flat) * kick, 0.12);
+	const restY = -0.78 + T / 2 + (L / 2 - flat) * kick;
+	g.position.set(0.1, restY, 0.12);
+	g.rotation.order = 'YXZ'; // heading, then the flip around the deck's long axis, then the pop
 	g.rotation.y = 0.18;
 	let spin = 0;
+	// Clicking it does a kickflip: pop, one full turn around the long axis, and it lands where it was,
+	// still upside down, with a small bounce.
+	const FLIP = 0.85;
+	const POP = 0.32;
+	let flipAge = -1;
+	const easeInOut = (x) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
 	return {
 		group: g,
 		poke() {
 			spin = 30;
+			if (flipAge < 0) flipAge = 0;
 		},
 		update(t, dt) {
 			spin *= Math.exp(-dt * 0.6);
 			for (const w of wheels) w.rotation.z -= spin * dt;
+			if (flipAge < 0) return;
+			flipAge += dt;
+			const x = Math.min(flipAge / FLIP, 1);
+			if (x < 1) {
+				g.position.y = restY + 4 * POP * x * (1 - x);
+				g.rotation.x = Math.PI * 2 * easeInOut(Math.min(1, x * 1.15));
+				g.rotation.z = Math.sin(Math.PI * x) * 0.28 * (1 - x); // nose pops up, levels out
+			} else {
+				// landing: a couple of little bounces, then settle
+				const a = flipAge - FLIP;
+				g.position.y = restY + Math.abs(Math.sin(a * 16)) * 0.025 * Math.exp(-a * 7);
+				g.rotation.x = 0;
+				g.rotation.z = Math.sin(a * 20) * 0.03 * Math.exp(-a * 6);
+				if (a > 0.8) {
+					g.position.y = restY;
+					g.rotation.z = 0;
+					flipAge = -1;
+				}
+			}
 		},
 	};
 }
