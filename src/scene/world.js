@@ -28,7 +28,6 @@ import {
 } from 'three/webgpu';
 import { pass, mrt, output, emissive } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
-import { worldlineShift } from './worldline.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { PALETTE, tileTexture, hudWallTexture, rng } from './textures.js';
@@ -196,8 +195,7 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 	const scenePass = pass(scene, camera);
 	scenePass.setMRT(mrt({ output, emissive }));
 	const glow = bloom(scenePass.getTextureNode('emissive'), 0.8, 0.3, 1.05);
-	const shift = worldlineShift(scenePass.getTextureNode('output'), glow);
-	pipeline.outputNode = reducedMotion ? scenePass.getTextureNode('output').add(glow) : shift.node;
+	pipeline.outputNode = scenePass.getTextureNode('output').add(glow);
 
 	// ---------------------------------------------------------------- camera rig
 	const cam = {
@@ -256,7 +254,6 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 	addEventListener('resize', resize);
 
 	function focus(id, panel = { x: 0, y: 0 }, { instant = false } = {}) {
-		if (!instant && (id ?? null) !== (focused?.id ?? null)) shift.trigger();
 		const item = items.find((i) => i.id === id);
 		focused = item ?? null;
 		if (item) {
@@ -402,7 +399,6 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 		if (cam.offset.lengthSq() > 0.25) camera.setViewOffset(size.w, size.h, cam.offset.x, cam.offset.y, size.w, size.h);
 		else camera.clearViewOffset();
 
-		shift.update(dt);
 		pipeline.render();
 	});
 
