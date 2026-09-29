@@ -538,8 +538,8 @@ body.no3d .panel {
 		right: 12px;
 		bottom: 76px;
 		width: auto;
-		max-height: 52vh;
-		padding: 20px 22px 24px;
+		max-height: 38vh;
+		padding: 12px 16px 16px;
 		animation-name: sheet-in;
 	}
 
@@ -550,12 +550,50 @@ body.no3d .panel {
 		}
 	}
 
-	.panel .num {
-		font-size: 2.4rem;
+	/* compact header: number and title on one line, back button pinned top-right while scrolling */
+	.panel .back {
+		float: right;
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		margin: 0 0 6px 10px;
+		padding: 0.35rem 0.75rem;
+		font-size: 0.72rem;
 	}
 
-	.panel .back {
-		margin-bottom: 14px;
+	.panel .num {
+		display: inline;
+		font-size: 1.5rem;
+		margin-right: 0.35em;
+	}
+
+	.panel h2 {
+		display: inline;
+		font-size: 1.12rem;
+		margin: 0;
+	}
+
+	.panel .body {
+		clear: both;
+		margin-top: 8px;
+		font-size: 0.92rem;
+		line-height: 1.55;
+	}
+
+	.panel .body p {
+		margin: 0.5em 0;
+	}
+
+	.panel .projects {
+		gap: 10px;
+	}
+
+	.panel .projects li {
+		padding: 10px 12px;
+	}
+
+	.panel video {
+		width: min(100%, 200px);
 	}
 
 	body:has(.panel:not([hidden])) .top-right,
