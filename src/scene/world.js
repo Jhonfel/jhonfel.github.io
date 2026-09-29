@@ -32,9 +32,9 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { PALETTE, tileTexture, hudWallTexture, rng } from './textures.js';
 import { createArm } from './arm.js';
-import { BUILDERS, metalUpa, nixieClock } from './objects.js';
+import { BUILDERS, metalUpa, nixieClock, skateboard } from './objects.js';
 
-const HOME = { pos: new Vector3(-0.2, 1.45, 2.95), look: new Vector3(-0.22, 0.3, -0.2) };
+const HOME = { pos: new Vector3(-0.2, 1.4, 3.05), look: new Vector3(-0.22, 0.16, -0.2) };
 const BENCH = { w: 3.5, d: 1.55, top: 0 };
 
 export async function createWorld(canvas, sections, { onHover, onSelect, reducedMotion }) {
@@ -177,7 +177,7 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 		items.push(item);
 	}
 	// decorative props: clickable, but they don't open a section
-	const props = { upa: metalUpa(), nixie: nixieClock() };
+	const props = { upa: metalUpa(), nixie: nixieClock(), skate: skateboard() };
 	for (const [id, prop] of Object.entries(props)) {
 		prop.group.traverse((o) => (o.userData.section = id));
 		scene.add(prop.group);
@@ -239,6 +239,12 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 		}
 	}
 	resize();
+	// ?cam=px,py,pz,lx,ly,lz pins the camera (for checking parts of the scene)
+	const pin = new URLSearchParams(location.search).get('cam')?.split(',').map(Number);
+	if (pin?.length === 6) {
+		cam.toPos.set(pin[0], pin[1], pin[2]);
+		cam.toLook.set(pin[3], pin[4], pin[5]);
+	}
 	cam.pos.copy(cam.toPos);
 	cam.look.copy(cam.toLook);
 	addEventListener('resize', resize);

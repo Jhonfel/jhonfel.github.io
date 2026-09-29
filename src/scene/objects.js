@@ -8,6 +8,8 @@ import {
 	PlaneGeometry,
 	TubeGeometry,
 	LatheGeometry,
+	ExtrudeGeometry,
+	Shape,
 	Vector2,
 	CatmullRomCurve3,
 	MeshStandardNodeMaterial,
@@ -227,58 +229,128 @@ function phone() {
 	return { group: place(g, [0.1, 0, 0.58], -0.5), view: { pos: [0.1, 0.6, 1.1], look: [0.1, 0.0, 0.55] } };
 }
 
-// SamiBot: the waiter robot from the startup I co-founded. White body, three trays with LED strips,
-// a rear column and a lid on top. It drives a small loop in its corner carrying a plate and a cup.
+// SamiBot, the waiter robot from the startup I co-founded, modelled after the real one:
+// silver drum base (its black top is the lowest tray), a wide curved rear shell, two D-shaped trays
+// with an LED strip on the front edge, and a rounded hood with a camera. It drives a small loop.
+function samibotDecal() {
+	const c = document.createElement('canvas');
+	c.width = 512;
+	c.height = 256;
+	const g = c.getContext('2d');
+	g.clearRect(0, 0, 512, 256);
+	g.fillStyle = '#4a5053';
+	g.font = '400 30px Jost, sans-serif';
+	g.textAlign = 'center';
+	g.letterSpacing = '8px';
+	g.fillText('SAMIBOT', 256, 44);
+	// service hatch: black outline with stripes
+	g.strokeStyle = '#1b1e20';
+	g.lineWidth = 5;
+	g.strokeRect(206, 110, 100, 120);
+	g.lineWidth = 6;
+	for (const y of [140, 160]) {
+		g.beginPath();
+		g.moveTo(222, y);
+		g.lineTo(290, y);
+		g.stroke();
+	}
+	g.strokeRect(222, 180, 68, 34);
+	const t = new CanvasTexture(c);
+	t.colorSpace = SRGBColorSpace;
+	return t;
+}
+
 function samibot() {
 	const g = new Group();
 	const body = new Group();
 	g.add(body);
-	const led = new MeshStandardNodeMaterial({ color: '#fff', emissive: '#4fd6e8', emissiveIntensity: 2.2, roughness: 0.3 });
-	const ledWarm = new MeshStandardNodeMaterial({ color: '#fff', emissive: '#ffae6b', emissiveIntensity: 2.2, roughness: 0.3 });
+	const R = 0.085;
+	const silver = mat('#dfe2e4', 0.32, 0.35);
+	const black = mat('#1c1f22', 0.9);
+	const ledTeal = new MeshStandardNodeMaterial({ color: '#fff', emissive: '#3fe0d0', emissiveIntensity: 3 });
+	const ledAmber = new MeshStandardNodeMaterial({ color: '#fff', emissive: '#ffa040', emissiveIntensity: 3 });
+	const ledRed = new MeshStandardNodeMaterial({ color: '#fff', emissive: '#ff3030', emissiveIntensity: 2 });
 
-	// base: rounded drum
+	// base drum with a bevelled top
+	const baseTop = 0.165;
 	const profile = [
-		[0, 0], [0.07, 0], [0.078, 0.006], [0.08, 0.02], [0.08, 0.09], [0.074, 0.105], [0, 0.105],
+		[0, 0], [R - 0.006, 0], [R, 0.008], [R, 0.14], [R - 0.004, 0.155], [R - 0.012, baseTop], [0, baseTop],
 	].map(([x, y]) => new Vector2(x, y));
-	body.add(mesh(new LatheGeometry(profile, 48), M.clay));
-	body.add(mesh(rbox(0.05, 0.035, 0.01, 0.004), M.ink, { pos: [0, 0.045, 0.076] }));
-	body.add(mesh(new TorusGeometry(0.079, 0.0025, 8, 64), led, { pos: [0, 0.012, 0], rot: [Math.PI / 2, 0, 0], shadow: false }));
+	body.add(mesh(new LatheGeometry(profile, 64), silver));
+	body.add(mesh(new CylinderGeometry(R - 0.014, R - 0.014, 0.003, 64), black, { pos: [0, baseTop + 0.0005, 0] }));
+	body.add(mesh(new TorusGeometry(R + 0.0003, 0.0012, 6, 64), mat('#9aa1a5', 0.4, 0.5), { pos: [0, 0.098, 0], rot: [Math.PI / 2, 0, 0], shadow: false }));
+	// front decal wrapped on the drum (label + hatch)
+	const decal = new MeshStandardNodeMaterial({ map: samibotDecal(), transparent: true, roughness: 0.4 });
+	body.add(mesh(new CylinderGeometry(R + 0.0006, R + 0.0006, 0.13, 32, 1, true, -0.8, 1.6), decal, { pos: [0, 0.075, 0], shadow: false }));
+	for (const a of [-0.9, 0.9])
+		body.add(mesh(new SphereGeometry(0.0035, 10, 8), ledRed, { pos: [Math.sin(a) * R, 0.022, Math.cos(a) * R], shadow: false }));
 
-	// rear column, slightly curved like the real one
-	const spine = new CatmullRomCurve3([[0, 0.1, -0.058], [0, 0.22, -0.066], [0, 0.34, -0.058]].map((p) => new Vector3(...p)));
-	body.add(mesh(new TubeGeometry(spine, 20, 0.022, 16), M.clay));
+	// wide rear shell: a thick ring sector around the back half, rising from the base to the hood
+	const shellShape = new Shape();
+	const a0 = Math.PI * 0.62;
+	const a1 = Math.PI * 1.38;
+	const ro = R - 0.004;
+	const ri = R - 0.016;
+	shellShape.absarc(0, 0, ro, a0, a1, false);
+	shellShape.absarc(0, 0, ri, a1, a0, true);
+	const shellH = 0.2;
+	const shell = mesh(new ExtrudeGeometry(shellShape, { depth: shellH, bevelEnabled: false, curveSegments: 32 }), silver);
+	// extrusion runs along +z; stand it up so it runs along +y, with the arc on the back (-z)
+	shell.rotation.x = -Math.PI / 2;
+	shell.rotation.z = -Math.PI / 2;
+	shell.position.y = baseTop - 0.005;
+	body.add(shell);
 
-	// trays: white rim, dark top, LED strip on the front edge
-	const trayProfile = [[0, 0], [0.07, 0], [0.078, 0.004], [0.078, 0.01], [0, 0.01]].map(([x, y]) => new Vector2(x, y));
-	[0.15, 0.225, 0.3].forEach((y, i) => {
-		body.add(mesh(new LatheGeometry(trayProfile, 48), M.clay, { pos: [0, y, 0] }));
-		body.add(mesh(new CylinderGeometry(0.068, 0.068, 0.002, 48), M.ink, { pos: [0, y + 0.011, 0] }));
-		const strip = mesh(new TorusGeometry(0.078, 0.002, 6, 32, Math.PI * 0.7), i === 1 ? ledWarm : led, { shadow: false });
-		strip.position.y = y + 0.002;
-		strip.rotation.set(Math.PI / 2, 0, Math.PI * 0.15);
-		body.add(strip);
+	// D-shaped trays: round at the front, cut flat where they meet the shell
+	const trayShape = new Shape();
+	const cut = -R * 0.55;
+	const ca = Math.asin(cut / R);
+	trayShape.absarc(0, 0, R, ca, Math.PI - ca, false);
+	trayShape.closePath();
+	const trayGeo = new ExtrudeGeometry(trayShape, { depth: 0.01, bevelEnabled: true, bevelThickness: 0.002, bevelSize: 0.002, bevelSegments: 2, curveSegments: 40 });
+	const insetGeo = new ExtrudeGeometry(trayShape, { depth: 0.002, bevelEnabled: false, curveSegments: 40 });
+	[
+		[0.238, ledAmber],
+		[0.305, ledTeal],
+	].forEach(([y, led]) => {
+		const tray = mesh(trayGeo, silver);
+		tray.rotation.x = Math.PI / 2; // shape XY -> XZ, extruding downwards
+		tray.position.y = y;
+		body.add(tray);
+		const inset = mesh(insetGeo, black);
+		inset.rotation.x = Math.PI / 2;
+		inset.scale.set(0.9, 0.9, 1);
+		inset.position.set(0, y + 0.0025, 0.004);
+		body.add(inset);
+		body.add(mesh(new BoxGeometry(0.04, 0.003, 0.003), led, { pos: [0, y - 0.006, R + 0.0015], shadow: false }));
 	});
 
-	// lid with a camera
-	body.add(mesh(rbox(0.13, 0.03, 0.15, 0.012), M.clay, { pos: [0, 0.355, 0.005] }));
-	body.add(mesh(new SphereGeometry(0.008, 16, 8), M.ink, { pos: [0, 0.358, 0.08] }));
+	// hood: rounded cap on top of the shell that leans forward over the top tray
+	const hood = new Group();
+	hood.position.set(0, 0.372, -0.009);
+	hood.rotation.x = 0.08;
+	hood.add(mesh(new RoundedBoxGeometry(2 * R, 0.085, 2 * R - 0.018, 6, 0.036), silver));
+	hood.add(mesh(new CylinderGeometry(0.0055, 0.0055, 0.003, 16), black, { pos: [0, 0.02, R - 0.0085], rot: [Math.PI / 2, 0, 0], shadow: false }));
+	body.add(hood);
 
-	// cargo on the middle tray
-	body.add(mesh(new CylinderGeometry(0.035, 0.028, 0.006, 32), mat('#fff', 0.3), { pos: [-0.012, 0.239, 0.01] }));
-	body.add(mesh(new CylinderGeometry(0.02, 0.018, 0.012, 24), M.amber, { pos: [-0.012, 0.248, 0.01] }));
-	body.add(mesh(new CylinderGeometry(0.012, 0.01, 0.035, 20), M.clay, { pos: [0.042, 0.254, -0.02] }));
+	// cargo on the middle tray: burger plate and a paper cup
+	body.add(mesh(new CylinderGeometry(0.034, 0.028, 0.005, 32), mat('#fff', 0.3), { pos: [-0.018, 0.2425, 0.022] }));
+	body.add(mesh(new SphereGeometry(0.016, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), M.amber, { pos: [-0.018, 0.245, 0.022] }));
+	body.add(mesh(new CylinderGeometry(0.011, 0.009, 0.03, 20), mat('#f3efe6', 0.6), { pos: [0.04, 0.253, 0.01] }));
 
-	g.scale.setScalar(1.3);
+	g.scale.setScalar(1.2);
 	const center = new Vector3(1.2, 0, 0.26);
 	return {
 		group: place(g, center.toArray()),
-		view: { pos: [0.95, 0.62, 1.05], look: [1.2, 0.22, 0.26] },
+		view: { pos: [0.95, 0.62, 1.05], look: [1.2, 0.24, 0.26] },
 		update(t) {
-			// slow ellipse, facing where it's going, with a little bob on the trays
-			const a = t * 0.25;
-			g.position.set(center.x + Math.sin(a) * 0.07, 0, center.z + Math.cos(a) * 0.12);
-			g.rotation.y = Math.atan2(Math.cos(a) * 0.07, -Math.sin(a) * 0.12);
-			body.rotation.z = Math.sin(t * 6) * 0.004;
+			// facing the room, easing forward and back like it's arriving at a table
+			const a = t * 0.3;
+			const heading = -0.35 + Math.sin(a * 0.7) * 0.45;
+			const d = Math.sin(a) * 0.06;
+			g.position.set(center.x + Math.sin(heading) * d, 0, center.z + Math.cos(heading) * d);
+			g.rotation.y = heading;
+			body.rotation.x = Math.cos(a) * 0.012; // leans a touch when it brakes
 		},
 	};
 }
@@ -384,6 +456,99 @@ export function nixieClock() {
 			digits.forEach((d, i) => d.set(str[i]));
 			const on = now.getMilliseconds() < 500;
 			colons.forEach((c) => (c.visible = on));
+		},
+	};
+}
+
+// My skateboard, upside down on the floor under the bench: graphic facing up, wheels in the air.
+// Clicking it spins the wheels.
+function deckGraphic() {
+	const c = document.createElement('canvas');
+	c.width = 1024;
+	c.height = 256;
+	const g = c.getContext('2d');
+	g.fillStyle = PALETTE.clay;
+	g.fillRect(0, 0, 1024, 256);
+	const r = rng(77);
+	for (let i = 0; i < 90; i++) {
+		const s = 32;
+		const x = Math.floor(r() * 32) * s;
+		const y = Math.floor(r() * 8) * s;
+		const p = r();
+		g.fillStyle = p < 0.5 ? PALETTE.peach : p < 0.8 ? PALETTE.tealSoft : PALETTE.teal;
+		g.globalAlpha = 0.5 + r() * 0.5;
+		g.fillRect(x, y, s, s);
+	}
+	g.globalAlpha = 1;
+	g.fillStyle = PALETTE.teal;
+	g.fillRect(0, 118, 1024, 20);
+	g.fillStyle = PALETTE.ink;
+	g.font = '300 64px Jost, sans-serif';
+	g.textAlign = 'center';
+	g.fillText('1.048596', 512, 100);
+	const t = new CanvasTexture(c);
+	t.colorSpace = SRGBColorSpace;
+	return t;
+}
+
+export function skateboard() {
+	const g = new Group();
+	const L = 0.8;
+	const W = 0.205;
+	const T = 0.012;
+	const flat = 0.26; // half-length of the flat middle
+	const kick = Math.tan(0.3);
+	// A segmented box bent into a deck: rounded nose/tail in plan, kicktails bent down (the board is flipped).
+	const geo = new BoxGeometry(L, T, W, 80, 1, 12);
+	const pos = geo.attributes.position;
+	for (let i = 0; i < pos.count; i++) {
+		const x = pos.getX(i);
+		const ax = Math.abs(x);
+		const round = L / 2 - W / 2;
+		if (ax > round) {
+			const k = (ax - round) / (W / 2);
+			pos.setZ(i, pos.getZ(i) * Math.sqrt(Math.max(0, 1 - k * k)) + 0 * k);
+		}
+		if (ax > flat) pos.setY(i, pos.getY(i) - (ax - flat) * kick);
+	}
+	geo.computeVertexNormals();
+	const wood = mat('#d8b98a', 0.6);
+	const deck = mesh(geo, [wood, wood, mat('#fff', 0.5, 0, { map: deckGraphic() }), mat('#18191b', 0.95), wood, wood]);
+	g.add(deck);
+
+	const metal = mat('#c3c8cb', 0.25, 0.9);
+	const bushing = mat(PALETTE.amber, 0.6);
+	const wheelMat = mat('#f1ece2', 0.45);
+	const wheels = [];
+	for (const x of [-0.2, 0.2]) {
+		const truck = new Group();
+		truck.position.set(x, T / 2, 0);
+		truck.add(mesh(new BoxGeometry(0.06, 0.006, 0.07), metal, { pos: [0, 0.003, 0] }));
+		truck.add(mesh(new CylinderGeometry(0.009, 0.009, 0.016, 12), bushing, { pos: [0, 0.014, 0] }));
+		truck.add(mesh(rbox(0.03, 0.022, 0.13, 0.008), metal, { pos: [0, 0.03, 0] }));
+		truck.add(mesh(new CylinderGeometry(0.0035, 0.0035, 0.21, 10), metal, { pos: [0, 0.036, 0], rot: [Math.PI / 2, 0, 0] }));
+		for (const z of [-0.088, 0.088]) {
+			const w = new Group();
+			w.position.set(0, 0.036, z);
+			w.add(mesh(new CylinderGeometry(0.027, 0.027, 0.03, 32), wheelMat, { rot: [Math.PI / 2, 0, 0] }));
+			w.add(mesh(new CylinderGeometry(0.012, 0.012, 0.031, 16), metal, { rot: [Math.PI / 2, 0, 0] }));
+			truck.add(w);
+			wheels.push(w);
+		}
+		g.add(truck);
+	}
+	// rest on the tips of the kicktails
+	g.position.set(0.1, -0.78 + T / 2 + (L / 2 - flat) * kick, 0.12);
+	g.rotation.y = 0.18;
+	let spin = 0;
+	return {
+		group: g,
+		poke() {
+			spin = 30;
+		},
+		update(t, dt) {
+			spin *= Math.exp(-dt * 0.6);
+			for (const w of wheels) w.rotation.z -= spin * dt;
 		},
 	};
 }

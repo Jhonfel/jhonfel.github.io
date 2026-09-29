@@ -99,6 +99,7 @@ addEventListener('pointermove', (e) => {
 const PROPS = {
 	upa: { en: 'Metal Upa', es: 'Metal Upa' },
 	nixie: { en: 'Nixie clock', es: 'Reloj nixie' },
+	skate: { en: 'Skateboard', es: 'Skateboard' },
 };
 
 function onHover(id) {
