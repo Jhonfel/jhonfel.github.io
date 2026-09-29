@@ -100,7 +100,6 @@ const PROPS = {
 	upa: { en: 'Metal Upa', es: 'Metal Upa' },
 	nixie: { en: 'Nixie clock', es: 'Reloj nixie' },
 	skate: { en: 'Skateboard', es: 'Skateboard' },
-	cds: { en: 'CDs · NOFX · Belvedere · No Te Va Gustar · Sonata Arctica', es: 'CDs · NOFX · Belvedere · No Te Va Gustar · Sonata Arctica' },
 };
 
 function onHover(id) {
