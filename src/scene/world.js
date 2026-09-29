@@ -184,6 +184,8 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 	}
 	scene.updateMatrixWorld(true);
 	for (const item of items) item.center.set(...item.view.look);
+	// objects on the bench that aren't tied to a section
+	for (const name of ['stethoscope']) if (!sections.some((s) => s.object === name)) scene.add(BUILDERS[name]().group);
 	const pickables = [...items.map((i) => i.group), ...Object.values(props).map((p) => p.group)];
 
 	// ---------------------------------------------------------------- post

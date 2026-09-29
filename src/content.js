@@ -181,24 +181,6 @@ export const SECTIONS = [
 		},
 	},
 	{
-		id: 'ausculapp',
-		object: 'stethoscope',
-		en: {
-			label: 'AusculApp',
-			title: 'AusculApp',
-			body: `
-				<p>An iOS app for remote auscultation: listening to heart and lung sounds when the doctor isn’t in the room.</p>
-				<p><a href="https://github.com/Jhonfel/AusculApp" target="_blank" rel="noopener">github.com/Jhonfel/AusculApp</a></p>`,
-		},
-		es: {
-			label: 'AusculApp',
-			title: 'AusculApp',
-			body: `
-				<p>Una app de iOS para auscultación remota: escuchar el corazón y los pulmones cuando el médico no está en la sala.</p>
-				<p><a href="https://github.com/Jhonfel/AusculApp" target="_blank" rel="noopener">github.com/Jhonfel/AusculApp</a></p>`,
-		},
-	},
-	{
 		id: 'hardware',
 		object: 'pcb',
 		en: {
