@@ -651,71 +651,282 @@ export function skateboard() {
 	};
 }
 
-// A stack of CDs in the empty corner of the bench. Spines and covers are just band names on colour,
-// not the real artwork. Clicking spins the loose disc.
+// Four CDs spread out in the corner of the bench. The covers are small homages drawn in code (no text,
+// no real artwork): only someone who knows the albums will recognise them. Clicking spins the loose disc.
+function coverCanvas(draw) {
+	const c = document.createElement('canvas');
+	c.width = c.height = 512;
+	const g = c.getContext('2d');
+	draw(g, rng(31));
+	const t = new CanvasTexture(c);
+	t.colorSpace = SRGBColorSpace;
+	return t;
+}
+
+function glassOnCoaster(g) {
+	// round coaster with a square tumbler on it, seen from the front-top
+	g.fillStyle = '#d7d4cc';
+	g.beginPath();
+	g.ellipse(360, 400, 92, 38, 0, 0, Math.PI * 2);
+	g.fill();
+	g.fillStyle = 'rgba(255,255,255,.35)';
+	g.fillRect(300, 250, 120, 150);
+	g.fillStyle = 'rgba(120,70,30,.55)';
+	g.fillRect(306, 310, 108, 84);
+	g.strokeStyle = 'rgba(255,255,255,.8)';
+	g.lineWidth = 4;
+	g.strokeRect(300, 250, 120, 150);
+}
+
+const COVERS = {
+	// warm wood, retro diagonal stripes from the top-left, a round coaster, a glass on a coaster
+	coaster: (g, r) => {
+		g.fillStyle = '#8a5a33';
+		g.fillRect(0, 0, 512, 512);
+		for (let i = 0; i < 70; i++) {
+			g.strokeStyle = `rgba(${60 + r() * 40},${30 + r() * 20},10,${0.15 + r() * 0.2})`;
+			g.lineWidth = 1 + r() * 3;
+			const y = r() * 700 - 100;
+			g.beginPath();
+			g.moveTo(0, y);
+			g.bezierCurveTo(170, y + 30, 340, y - 30, 512, y + 60);
+			g.stroke();
+		}
+		g.save();
+		g.translate(0, 0);
+		g.rotate(-Math.PI / 4.2);
+		['#efe6cf', '#f2c230', '#ec8a1c', '#c9361e', '#6b3a1c'].forEach((col, k) => {
+			g.fillStyle = col;
+			g.fillRect(-400, 150 + k * 34, 900, 34);
+		});
+		g.restore();
+		g.fillStyle = '#efe6cf';
+		g.beginPath();
+		g.arc(110, 410, 70, 0, Math.PI * 2);
+		g.fill();
+		g.strokeStyle = '#a0522d';
+		g.lineWidth = 8;
+		g.beginPath();
+		g.arc(110, 410, 52, 0, Math.PI * 2);
+		g.stroke();
+		glassOnCoaster(g);
+	},
+	// red and black bubbles, dark lenses with red rims, tiny grey figures with raised arms
+	twas: (g, r) => {
+		g.fillStyle = '#120405';
+		g.fillRect(0, 0, 512, 512);
+		for (let i = 0; i < 120; i++) {
+			const x = r() * 512;
+			const y = r() * 512;
+			const rad = 4 + r() * 26;
+			const grd = g.createRadialGradient(x - rad * 0.3, y - rad * 0.3, 1, x, y, rad);
+			grd.addColorStop(0, '#ff5a4a');
+			grd.addColorStop(1, '#6d0c0c');
+			g.fillStyle = grd;
+			g.beginPath();
+			g.arc(x, y, rad, 0, Math.PI * 2);
+			g.fill();
+		}
+		for (const [x, y, rx, ry, a] of [[250, 300, 150, 95, -0.2], [420, 420, 110, 80, 0.3], [380, 110, 140, 90, 0.1]]) {
+			g.fillStyle = '#0c0203';
+			g.strokeStyle = '#d4211b';
+			g.lineWidth = 10;
+			g.beginPath();
+			g.ellipse(x, y, rx, ry, a, 0, Math.PI * 2);
+			g.fill();
+			g.stroke();
+		}
+		const figure = (x, y, s) => {
+			g.fillStyle = '#b9b6ad';
+			g.strokeStyle = '#b9b6ad';
+			g.lineWidth = 5 * s;
+			g.lineCap = 'round';
+			g.beginPath();
+			g.arc(x, y - 30 * s, 9 * s, 0, Math.PI * 2);
+			g.fill();
+			g.beginPath();
+			g.moveTo(x, y - 20 * s);
+			g.lineTo(x, y + 12 * s);
+			g.moveTo(x, y - 12 * s);
+			g.lineTo(x - 16 * s, y - 40 * s);
+			g.moveTo(x, y - 12 * s);
+			g.lineTo(x + 16 * s, y - 40 * s);
+			g.moveTo(x, y + 12 * s);
+			g.lineTo(x - 10 * s, y + 36 * s);
+			g.moveTo(x, y + 12 * s);
+			g.lineTo(x + 10 * s, y + 36 * s);
+			g.stroke();
+		};
+		figure(390, 110, 1.2);
+		figure(230, 300, 1.0);
+		figure(430, 430, 0.8);
+		figure(50, 460, 0.8);
+	},
+	// black field: red heart in a crosshair, yellow bolts in an X, white bombs on the axes, red discs in the corners
+	alarmas: (g) => {
+		g.fillStyle = '#0b0b0b';
+		g.fillRect(0, 0, 512, 512);
+		const C = 256;
+		for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+			g.fillStyle = '#e8312a';
+			g.beginPath();
+			g.arc(C + dx * 190, C + dy * 190, 54, 0, Math.PI * 2);
+			g.fill();
+			// zig-zag bolt from the corner to the centre
+			g.fillStyle = '#f5b41a';
+			g.beginPath();
+			const p = (t, o) => [C + dx * (190 - t * 150) + o * dy * 14, C + dy * (190 - t * 150) - o * dx * 14];
+			g.moveTo(...p(0, -1));
+			g.lineTo(...p(0.45, 0.6));
+			g.lineTo(...p(0.5, -0.3));
+			g.lineTo(...p(1, 0.2));
+			g.lineTo(...p(0.55, -1.1));
+			g.lineTo(...p(0.5, 0.1));
+			g.lineTo(...p(0, 1));
+			g.closePath();
+			g.fill();
+		}
+		for (const a of [0, Math.PI / 2, Math.PI, -Math.PI / 2]) {
+			g.save();
+			g.translate(C + Math.cos(a) * 185, C + Math.sin(a) * 185);
+			g.rotate(a);
+			g.fillStyle = '#f2f2f2';
+			g.beginPath();
+			g.ellipse(0, 0, 40, 16, 0, 0, Math.PI * 2);
+			g.fill();
+			g.fillRect(28, -12, 16, 24);
+			g.restore();
+		}
+		// heart
+		g.fillStyle = '#e8312a';
+		g.beginPath();
+		g.moveTo(C, C + 52);
+		g.bezierCurveTo(C - 70, C + 5, C - 55, C - 55, C, C - 22);
+		g.bezierCurveTo(C + 55, C - 55, C + 70, C + 5, C, C + 52);
+		g.fill();
+		g.strokeStyle = '#ffffff';
+		g.lineWidth = 5;
+		g.beginPath();
+		g.arc(C, C, 22, 0, Math.PI * 2);
+		g.moveTo(C - 34, C);
+		g.lineTo(C + 34, C);
+		g.moveTo(C, C - 34);
+		g.lineTo(C, C + 34);
+		g.stroke();
+		for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+			g.beginPath();
+			g.moveTo(C + dx * 80, C + dy * 55);
+			g.lineTo(C + dx * 80, C + dy * 80);
+			g.lineTo(C + dx * 55, C + dy * 80);
+			g.stroke();
+		}
+	},
+	// deep blue mist, two icy eyes above, a lone figure holding a candle, white doves below
+	word: (g, r) => {
+		const bg = g.createRadialGradient(256, 300, 20, 256, 256, 380);
+		bg.addColorStop(0, '#5f8fc4');
+		bg.addColorStop(0.5, '#23456f');
+		bg.addColorStop(1, '#0a1628');
+		g.fillStyle = bg;
+		g.fillRect(0, 0, 512, 512);
+		for (let i = 0; i < 40; i++) {
+			g.fillStyle = `rgba(200,225,255,${r() * 0.08})`;
+			g.beginPath();
+			g.ellipse(r() * 512, 250 + r() * 260, 60 + r() * 120, 20 + r() * 40, 0, 0, Math.PI * 2);
+			g.fill();
+		}
+		for (const x of [120, 392]) {
+			g.fillStyle = 'rgba(210,230,255,.55)';
+			g.beginPath();
+			g.ellipse(x, 170, 70, 26, 0, 0, Math.PI * 2);
+			g.fill();
+			g.fillStyle = '#4fa3ff';
+			g.beginPath();
+			g.arc(x, 170, 22, 0, Math.PI * 2);
+			g.fill();
+			g.fillStyle = '#071322';
+			g.beginPath();
+			g.arc(x, 170, 9, 0, Math.PI * 2);
+			g.fill();
+		}
+		// figure: long dark coat, pale shirt, candle glow at the chest
+		g.fillStyle = '#10151d';
+		g.beginPath();
+		g.moveTo(256, 190);
+		g.lineTo(300, 250);
+		g.lineTo(312, 470);
+		g.lineTo(200, 470);
+		g.lineTo(212, 250);
+		g.closePath();
+		g.fill();
+		g.fillStyle = '#d9c7a4';
+		g.fillRect(238, 240, 36, 110);
+		g.beginPath();
+		g.arc(256, 200, 20, 0, Math.PI * 2);
+		g.fill();
+		const glow = g.createRadialGradient(262, 300, 2, 262, 300, 70);
+		glow.addColorStop(0, 'rgba(255,200,110,.95)');
+		glow.addColorStop(1, 'rgba(255,160,60,0)');
+		g.fillStyle = glow;
+		g.beginPath();
+		g.arc(262, 300, 70, 0, Math.PI * 2);
+		g.fill();
+		const dove = (x, y, s, flip) => {
+			g.fillStyle = 'rgba(245,250,255,.9)';
+			g.beginPath();
+			g.moveTo(x, y);
+			g.quadraticCurveTo(x + flip * 40 * s, y - 40 * s, x + flip * 70 * s, y - 10 * s);
+			g.quadraticCurveTo(x + flip * 40 * s, y - 5 * s, x + flip * 30 * s, y + 10 * s);
+			g.quadraticCurveTo(x + flip * 10 * s, y + 12 * s, x, y);
+			g.fill();
+		};
+		dove(90, 360, 1.1, 1);
+		dove(140, 400, 0.8, -1);
+		dove(420, 370, 1.1, -1);
+		dove(380, 410, 0.8, 1);
+	},
+};
+
 const CDS = [
-	{ band: 'NOFX', bg: '#141414', fg: '#f2f2f2', accent: '#d62828' },
-	{ band: 'BELVEDERE', bg: '#b3261e', fg: '#ffffff', accent: '#1a1a1a' },
-	{ band: 'NO TE VA GUSTAR', bg: '#e9b949', fg: '#1d1d1d', accent: '#2b6677' },
-	{ band: 'SONATA ARCTICA', bg: '#1e3f66', fg: '#dbe9f7', accent: '#8fc1e3' },
+	{ cover: 'coaster', spine: ['#8a5a33', '#f2c230', '#c9361e'], pos: [-0.075, 0, -0.06], rot: 0.12, level: 0 },
+	{ cover: 'twas', spine: ['#120405', '#d4211b', '#b9b6ad'], pos: [0.075, 0, -0.075], rot: -0.1, level: 0 },
+	{ cover: 'word', spine: ['#0a1628', '#4fa3ff', '#d9c7a4'], pos: [0.085, 0, 0.08], rot: 0.18, level: 0 },
+	{ cover: 'alarmas', spine: ['#0b0b0b', '#e8312a', '#f5b41a'], pos: [-0.06, 0, 0.075], rot: -0.22, level: 1 },
 ];
 
-function cdInsert({ band, bg, fg, accent }) {
-	const spine = document.createElement('canvas');
-	spine.width = 512;
-	spine.height = 48;
-	let g = spine.getContext('2d');
-	g.fillStyle = bg;
-	g.fillRect(0, 0, 512, 48);
-	g.fillStyle = fg;
-	g.font = '600 30px Jost, sans-serif';
-	g.textBaseline = 'middle';
-	g.fillText(band, 18, 26);
-	g.fillStyle = accent;
-	g.fillRect(470, 12, 24, 24);
-
-	const cover = document.createElement('canvas');
-	cover.width = cover.height = 256;
-	g = cover.getContext('2d');
-	g.fillStyle = bg;
-	g.fillRect(0, 0, 256, 256);
-	g.fillStyle = accent;
-	g.fillRect(0, 200, 256, 14);
-	g.fillStyle = fg;
-	g.font = `600 ${band.length > 10 ? 26 : 40}px Jost, sans-serif`;
-	g.textAlign = 'center';
-	const words = band.length > 10 ? band.split(' ') : [band];
-	words.forEach((w, i) => g.fillText(w, 128, 110 + (i - (words.length - 1) / 2) * 32));
-
-	const tex = (c) => {
-		const t = new CanvasTexture(c);
-		t.colorSpace = SRGBColorSpace;
-		return t;
-	};
-	return { spine: tex(spine), cover: tex(cover) };
+function spineTexture(colors) {
+	const c = document.createElement('canvas');
+	c.width = 256;
+	c.height = 24;
+	const g = c.getContext('2d');
+	g.fillStyle = colors[0];
+	g.fillRect(0, 0, 256, 24);
+	g.fillStyle = colors[1];
+	g.fillRect(12, 6, 120, 12);
+	g.fillStyle = colors[2];
+	g.fillRect(200, 6, 30, 12);
+	const t = new CanvasTexture(c);
+	t.colorSpace = SRGBColorSpace;
+	return t;
 }
 
 export function cds() {
 	const g = new Group();
-	const W = 0.125; // spine length (x)
-	const D = 0.142; // depth (z)
+	const W = 0.125;
+	const D = 0.142;
 	const H = 0.0104;
-	const plastic = new MeshStandardNodeMaterial({ color: '#ffffff', roughness: 0.05, transparent: true, opacity: 0.28, depthWrite: false });
+	const plastic = new MeshStandardNodeMaterial({ color: '#ffffff', roughness: 0.05, transparent: true, opacity: 0.1, depthWrite: false });
 	const tray = mat('#1f2224', 0.5);
-	const r = rng(12);
-	CDS.forEach((cd, i) => {
-		const { spine, cover } = cdInsert(cd);
+	for (const cd of CDS) {
 		const c = new Group();
-		c.position.y = H / 2 + i * H;
-		c.rotation.y = (r() - 0.5) * 0.25;
-		c.position.x = (r() - 0.5) * 0.012;
-		// insert: +z face is the spine facing out, +y the cover (CanvasTexture on a plane reads correctly)
+		c.position.set(cd.pos[0], H / 2 + cd.level * H, cd.pos[2]);
+		c.rotation.y = cd.rot;
 		c.add(mesh(new BoxGeometry(W - 0.004, H - 0.002, D - 0.004), tray, { shadow: false }));
-		c.add(mesh(new PlaneGeometry(W - 0.006, H - 0.003), mat('#fff', 0.5, 0, { map: spine }), { pos: [0, 0, D / 2 - 0.0015], shadow: false }));
-		c.add(mesh(new PlaneGeometry(W - 0.012, D - 0.02), mat('#fff', 0.5, 0, { map: cover }), { pos: [0.003, H / 2 - 0.0009, 0], rot: [-Math.PI / 2, 0, 0], shadow: false }));
+		c.add(mesh(new PlaneGeometry(W - 0.006, H - 0.003), mat('#fff', 0.5, 0, { map: spineTexture(cd.spine) }), { pos: [0, 0, D / 2 - 0.0015], shadow: false }));
+		c.add(mesh(new PlaneGeometry(W - 0.01, W - 0.01), mat('#fff', 0.45, 0, { map: coverCanvas(COVERS[cd.cover]) }), { pos: [0.002, H / 2 - 0.0009, 0], rot: [-Math.PI / 2, 0, 0], shadow: false }));
 		c.add(mesh(new BoxGeometry(W, H, D), plastic));
 		g.add(c);
-	});
+	}
 	// a loose disc, data side up
 	const discMat = new MeshPhysicalNodeMaterial({
 		color: '#eef1f3',
@@ -727,7 +938,7 @@ export function cds() {
 		side: DoubleSide,
 	});
 	const disc = new Group();
-	disc.position.set(0.12, 0.0015, 0.06);
+	disc.position.set(0.23, 0.0015, 0.1);
 	disc.add(mesh(new RingGeometry(0.0075, 0.06, 96), discMat, { rot: [-Math.PI / 2, 0, 0] }));
 	disc.add(mesh(new RingGeometry(0.0075, 0.017, 48), mat('#eef1f2', 0.2, 0, { transparent: true, opacity: 0.6, side: DoubleSide }), { pos: [0, 0.0003, 0], rot: [-Math.PI / 2, 0, 0], shadow: false }));
 	g.add(disc);
