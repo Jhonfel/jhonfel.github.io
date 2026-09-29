@@ -229,7 +229,8 @@ export const SECTIONS = [
 			body: `
 				<p>I co-founded SamiBot, a robotics startup that built waiter robots: three trays, a screen on top,
 				and it drives the dishes from the kitchen to the table on its own.</p>
-				<p>The little one driving around the corner of the bench is a scale model. This is the real one:</p>
+				<p>The one on the bench is opened up for repairs: chassis on a stand, battery, lidar and cables out.
+				This is how it looked closed, delivering a burger:</p>
 				<video src="${import.meta.env.BASE_URL}video/samibot.mp4" poster="${import.meta.env.BASE_URL}video/samibot.jpg"
 					autoplay muted loop playsinline preload="none" aria-label="SamiBot delivering a plate"></video>`,
 		},
@@ -239,7 +240,8 @@ export const SECTIONS = [
 			body: `
 				<p>Cofundé SamiBot, una startup de robótica que hacía robots meseros: tres bandejas, una pantalla arriba,
 				y lleva solo los platos de la cocina a la mesa.</p>
-				<p>El pequeño que da vueltas en la esquina del banco es una maqueta. Este es el de verdad:</p>
+				<p>El del banco está desarmado para reparación: el chasis en un soporte, la batería, el lidar y los cables afuera.
+				Así se veía armado, entregando una hamburguesa:</p>
 				<video src="${import.meta.env.BASE_URL}video/samibot.mp4" poster="${import.meta.env.BASE_URL}video/samibot.jpg"
 					autoplay muted loop playsinline preload="none" aria-label="SamiBot entregando un plato"></video>`,
 		},

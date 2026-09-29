@@ -261,96 +261,129 @@ function samibotDecal() {
 }
 
 function samibot() {
+	// Opened up for repairs: chassis on a test stand with the wheels in the air, electronics and cables out,
+	// the rear frame with one tray still mounted, and the removed shell and second tray on the bench.
 	const g = new Group();
-	const body = new Group();
-	g.add(body);
 	const R = 0.085;
 	const silver = mat('#dfe2e4', 0.32, 0.35);
+	const alu = mat('#aab2b6', 0.35, 0.8);
 	const black = mat('#1c1f22', 0.9);
+	const rubber = mat('#222527', 0.85);
 	const ledTeal = new MeshStandardNodeMaterial({ color: '#fff', emissive: '#3fe0d0', emissiveIntensity: 3 });
-	const ledAmber = new MeshStandardNodeMaterial({ color: '#fff', emissive: '#ffa040', emissiveIntensity: 3 });
-	const ledRed = new MeshStandardNodeMaterial({ color: '#fff', emissive: '#ff3030', emissiveIntensity: 2 });
+	const ledRed = new MeshStandardNodeMaterial({ color: '#fff', emissive: '#ff3030', emissiveIntensity: 3 });
+	const wire = (pts, color, r = 0.0022) =>
+		mesh(new TubeGeometry(new CatmullRomCurve3(pts.map((p) => new Vector3(...p))), 48, r, 8), mat(color, 0.55));
 
-	// base drum with a bevelled top
-	const baseTop = 0.165;
-	const profile = [
-		[0, 0], [R - 0.006, 0], [R, 0.008], [R, 0.14], [R - 0.004, 0.155], [R - 0.012, baseTop], [0, baseTop],
-	].map(([x, y]) => new Vector2(x, y));
-	body.add(mesh(new LatheGeometry(profile, 64), silver));
-	body.add(mesh(new CylinderGeometry(R - 0.014, R - 0.014, 0.003, 64), black, { pos: [0, baseTop + 0.0005, 0] }));
-	body.add(mesh(new TorusGeometry(R + 0.0003, 0.0012, 6, 64), mat('#9aa1a5', 0.4, 0.5), { pos: [0, 0.098, 0], rot: [Math.PI / 2, 0, 0], shadow: false }));
-	// front decal wrapped on the drum (label + hatch)
-	const decal = new MeshStandardNodeMaterial({ map: samibotDecal(), transparent: true, roughness: 0.4 });
-	body.add(mesh(new CylinderGeometry(R + 0.0006, R + 0.0006, 0.13, 32, 1, true, -0.8, 1.6), decal, { pos: [0, 0.075, 0], shadow: false }));
-	for (const a of [-0.9, 0.9])
-		body.add(mesh(new SphereGeometry(0.0035, 10, 8), ledRed, { pos: [Math.sin(a) * R, 0.022, Math.cos(a) * R], shadow: false }));
+	// test stand + chassis plate
+	g.add(mesh(rbox(0.12, 0.03, 0.08, 0.006), M.clayMatte, { pos: [0, 0.015, 0] }));
+	const plateY = 0.046;
+	g.add(mesh(new CylinderGeometry(R, R, 0.006, 64), alu, { pos: [0, plateY, 0] }));
 
-	// wide rear shell: a thick ring sector around the back half, rising from the base to the hood
-	const shellShape = new Shape();
-	const a0 = Math.PI * 0.62;
-	const a1 = Math.PI * 1.38;
-	const ro = R - 0.004;
-	const ri = R - 0.016;
-	shellShape.absarc(0, 0, ro, a0, a1, false);
-	shellShape.absarc(0, 0, ri, a1, a0, true);
-	const shellH = 0.2;
-	const shell = mesh(new ExtrudeGeometry(shellShape, { depth: shellH, bevelEnabled: false, curveSegments: 32 }), silver);
-	// extrusion runs along +z; stand it up so it runs along +y, with the arc on the back (-z)
-	shell.rotation.x = -Math.PI / 2;
-	shell.rotation.z = -Math.PI / 2;
-	shell.position.y = baseTop - 0.005;
-	body.add(shell);
+	// differential drive wheels (spinning on the stand) and casters
+	const wheels = [];
+	for (const x of [-0.079, 0.079]) {
+		const w = new Group();
+		w.position.set(x, 0.032, 0);
+		w.add(mesh(new CylinderGeometry(0.028, 0.028, 0.014, 32), rubber, { rot: [0, 0, Math.PI / 2] }));
+		w.add(mesh(new CylinderGeometry(0.017, 0.017, 0.016, 24), silver, { rot: [0, 0, Math.PI / 2] }));
+		for (let k = 0; k < 5; k++)
+			w.add(mesh(new BoxGeometry(0.017, 0.003, 0.004), alu, { pos: [Math.sign(x) * 0.0005, 0, 0], rot: [(k / 5) * Math.PI, 0, 0], shadow: false }));
+		g.add(w);
+		wheels.push(w);
+	}
+	for (const z of [-0.066, 0.066]) g.add(mesh(new SphereGeometry(0.008, 12, 8), black, { pos: [0, 0.037, z] }));
 
-	// D-shaped trays: round at the front, cut flat where they meet the shell
+	// electronics on the plate
+	const top = plateY + 0.003;
+	g.add(mesh(rbox(0.09, 0.034, 0.042, 0.004), mat('#263540', 0.6), { pos: [0, top + 0.017, -0.03] }));
+	g.add(mesh(new BoxGeometry(0.06, 0.012, 0.0005), M.peach, { pos: [0, top + 0.02, -0.0088], shadow: false }));
+	g.add(mesh(new BoxGeometry(0.052, 0.004, 0.036), mat(PALETTE.tealDeep, 0.4), { pos: [-0.045, top + 0.006, 0.036] }));
+	for (let k = 0; k < 6; k++) g.add(mesh(new BoxGeometry(0.03, 0.014, 0.0015), alu, { pos: [-0.045, top + 0.015, 0.024 + k * 0.005] }));
+	g.add(mesh(new BoxGeometry(0.046, 0.004, 0.03), mat('#2f7a52', 0.4), { pos: [0.045, top + 0.006, 0.038] }));
+	g.add(mesh(new BoxGeometry(0.014, 0.008, 0.012), M.chrome, { pos: [0.062, top + 0.012, 0.048] }));
+	g.add(mesh(new BoxGeometry(0.012, 0.006, 0.01), M.chrome, { pos: [0.062, top + 0.011, 0.03] }));
+	const status = mesh(new SphereGeometry(0.0025, 8, 6), ledRed, { pos: [0.03, top + 0.01, 0.05], shadow: false });
+	g.add(status);
+
+	// lidar: fixed base, spinning head with a window
+	g.add(mesh(new CylinderGeometry(0.018, 0.019, 0.014, 32), black, { pos: [0, top + 0.012, 0.062] }));
+	const lidar = new Group();
+	lidar.position.set(0, top + 0.026, 0.062);
+	lidar.add(mesh(new CylinderGeometry(0.016, 0.016, 0.013, 32), mat('#34393c', 0.5)));
+	lidar.add(mesh(new BoxGeometry(0.012, 0.006, 0.002), ledTeal, { pos: [0, 0, 0.0162], shadow: false }));
+	g.add(lidar);
+
+	// standoffs and a half upper deck
+	for (const [x, z] of [[-0.055, -0.045], [0.055, -0.045], [-0.055, 0.0], [0.055, 0.0]])
+		g.add(mesh(new CylinderGeometry(0.0028, 0.0028, 0.07, 8), M.chrome, { pos: [x, top + 0.035, z] }));
+	g.add(mesh(new CylinderGeometry(R - 0.006, R - 0.006, 0.004, 48, 1, false, Math.PI / 2, Math.PI), alu, { pos: [0, top + 0.071, 0] }));
+
+	// rear frame (the skeleton of the shell) with one tray still mounted
+	for (const x of [-0.04, 0.04]) g.add(mesh(new BoxGeometry(0.012, 0.3, 0.012), alu, { pos: [x, top + 0.15, -0.07] }));
+	g.add(mesh(new BoxGeometry(0.092, 0.012, 0.012), alu, { pos: [0, top + 0.294, -0.07] }));
 	const trayShape = new Shape();
-	const cut = -R * 0.55;
-	const ca = Math.asin(cut / R);
+	const ca = Math.asin(-0.55);
 	trayShape.absarc(0, 0, R, ca, Math.PI - ca, false);
 	trayShape.closePath();
 	const trayGeo = new ExtrudeGeometry(trayShape, { depth: 0.01, bevelEnabled: true, bevelThickness: 0.002, bevelSize: 0.002, bevelSegments: 2, curveSegments: 40 });
 	const insetGeo = new ExtrudeGeometry(trayShape, { depth: 0.002, bevelEnabled: false, curveSegments: 40 });
-	[
-		[0.238, ledAmber],
-		[0.305, ledTeal],
-	].forEach(([y, led]) => {
-		const tray = mesh(trayGeo, silver);
-		tray.rotation.x = Math.PI / 2; // shape XY -> XZ, extruding downwards
-		tray.position.y = y;
-		body.add(tray);
+	const tray = (y) => {
+		const t = new Group();
+		const base = mesh(trayGeo, silver);
+		base.rotation.x = Math.PI / 2;
+		t.add(base);
 		const inset = mesh(insetGeo, black);
 		inset.rotation.x = Math.PI / 2;
 		inset.scale.set(0.9, 0.9, 1);
-		inset.position.set(0, y + 0.0025, 0.004);
-		body.add(inset);
-		body.add(mesh(new BoxGeometry(0.04, 0.003, 0.003), led, { pos: [0, y - 0.006, R + 0.0015], shadow: false }));
-	});
+		inset.position.set(0, 0.0025, 0.004);
+		t.add(inset);
+		t.position.y = y;
+		return t;
+	};
+	const mounted = tray(top + 0.25);
+	mounted.add(mesh(new BoxGeometry(0.04, 0.003, 0.003), ledTeal, { pos: [0, -0.006, R + 0.0015], shadow: false }));
+	g.add(mounted);
 
-	// hood: rounded cap on top of the shell that leans forward over the top tray
-	const hood = new Group();
-	hood.position.set(0, 0.372, -0.009);
-	hood.rotation.x = 0.08;
-	hood.add(mesh(new RoundedBoxGeometry(2 * R, 0.085, 2 * R - 0.018, 6, 0.036), silver));
-	hood.add(mesh(new CylinderGeometry(0.0055, 0.0055, 0.003, 16), black, { pos: [0, 0.02, R - 0.0085], rot: [Math.PI / 2, 0, 0], shadow: false }));
-	body.add(hood);
+	// cables
+	g.add(wire([[-0.02, top + 0.034, -0.03], [-0.03, top + 0.06, 0.0], [-0.045, top + 0.02, 0.03]], '#c0392b'));
+	g.add(wire([[-0.01, top + 0.034, -0.03], [-0.022, top + 0.055, 0.004], [-0.038, top + 0.02, 0.028]], '#1c1f22'));
+	g.add(wire([[-0.06, top + 0.008, 0.03], [-0.075, top + 0.012, 0.012], [-0.079, 0.045, 0.004]], '#e0a030', 0.0018));
+	g.add(wire([[-0.03, top + 0.008, 0.045], [0.03, top + 0.03, 0.06], [0.09, top + 0.01, 0.04], [0.082, 0.045, 0.006]], '#e0a030', 0.0018));
+	g.add(wire([[0.03, top + 0.008, 0.045], [0.016, top + 0.02, 0.058], [0.008, top + 0.02, 0.062]], '#3a8fb7', 0.0016));
+	g.add(wire([[0.03, top + 0.004, -0.07], [0.034, top + 0.12, -0.064], [0.03, top + 0.22, -0.064], [0.0, top + 0.244, 0.02], [0, top + 0.244, R - 0.004]], PALETTE.teal, 0.0018));
+	// a USB cable wandering off the stand across the bench
+	g.add(wire([[0.066, top + 0.012, 0.048], [0.11, top + 0.01, 0.07], [0.13, 0.02, 0.1], [0.12, 0.003, 0.16], [0.02, 0.003, 0.2], [-0.1, 0.003, 0.18]], '#e8ebec', 0.0025));
 
-	// cargo on the middle tray: burger plate and a paper cup
-	body.add(mesh(new CylinderGeometry(0.034, 0.028, 0.005, 32), mat('#fff', 0.3), { pos: [-0.018, 0.2425, 0.022] }));
-	body.add(mesh(new SphereGeometry(0.016, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), M.amber, { pos: [-0.018, 0.245, 0.022] }));
-	body.add(mesh(new CylinderGeometry(0.011, 0.009, 0.03, 20), mat('#f3efe6', 0.6), { pos: [0.04, 0.253, 0.01] }));
+	// removed shell standing beside it, label facing out
+	const shell = new Group();
+	const profile = [[R, 0], [R, 0.14], [R - 0.004, 0.155], [R - 0.012, 0.165]].map(([x, y]) => new Vector2(x, y));
+	shell.add(mesh(new LatheGeometry(profile, 48, -Math.PI * 0.42, Math.PI * 0.84), mat('#dfe2e4', 0.32, 0.35, { side: DoubleSide })));
+	const decal = new MeshStandardNodeMaterial({ map: samibotDecal(), transparent: true, roughness: 0.4 });
+	shell.add(mesh(new CylinderGeometry(R + 0.0006, R + 0.0006, 0.13, 32, 1, true, -0.8, 1.6), decal, { pos: [0, 0.075, 0], shadow: false }));
+	shell.position.set(0.2, 0, 0.0);
+	shell.rotation.y = -0.2;
+	g.add(shell);
 
-	g.scale.setScalar(1.2);
-	const center = new Vector3(1.2, 0, 0.26);
+	// second tray lying on the bench, and a screwdriver
+	const loose = tray(0.012);
+	loose.position.set(0.25, 0.012, 0.17);
+	loose.rotation.y = -0.6;
+	g.add(loose);
+	const driver = new Group();
+	driver.add(mesh(new CylinderGeometry(0.009, 0.008, 0.06, 16), M.amber, { rot: [0, 0, Math.PI / 2] }));
+	driver.add(mesh(new CylinderGeometry(0.0025, 0.0025, 0.06, 8), M.chrome, { pos: [0.06, 0, 0], rot: [0, 0, Math.PI / 2] }));
+	driver.position.set(-0.06, 0.009, 0.16);
+	driver.rotation.y = -0.5;
+	g.add(driver);
+
+	g.scale.setScalar(1.25);
 	return {
-		group: place(g, center.toArray()),
-		view: { pos: [0.95, 0.62, 1.05], look: [1.2, 0.24, 0.26] },
-		update(t) {
-			// facing the room, easing forward and back like it's arriving at a table
-			const a = t * 0.3;
-			const heading = -0.35 + Math.sin(a * 0.7) * 0.45;
-			const d = Math.sin(a) * 0.06;
-			g.position.set(center.x + Math.sin(heading) * d, 0, center.z + Math.cos(heading) * d);
-			g.rotation.y = heading;
-			body.rotation.x = Math.cos(a) * 0.012; // leans a touch when it brakes
+		group: place(g, [1.2, 0, 0.24], -0.35),
+		view: { pos: [0.92, 0.66, 1.2], look: [1.24, 0.12, 0.24] },
+		update(t, dt) {
+			for (const w of wheels) w.rotation.x += dt * 5;
+			lidar.rotation.y += dt * 9;
+			status.visible = Math.floor(t * 2) % 2 === 0;
 		},
 	};
 }
