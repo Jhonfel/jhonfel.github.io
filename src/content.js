@@ -42,7 +42,7 @@ export const SECTIONS = [
 			label: 'About me',
 			title: 'Hi, I’m Jhon Felipe Delgado',
 			body: `
-				<p>ML Engineer at <strong>MercadoLibre</strong>, occasional professor and PhD student at
+				<p>ML Engineer at <strong>MercadoLibre</strong>, adjunct professor and PhD student at
 				<strong>Universidad Nacional de Colombia</strong>.</p>
 				<p>Mechatronics engineer from Universidad Nacional de Colombia.</p>`,
 		},
@@ -96,7 +96,7 @@ export const SECTIONS = [
 			label: 'Teaching',
 			title: 'Introducción a los Sistemas Inteligentes',
 			body: `
-				<p>I teach the Intelligent Systems course at UNAL from time to time. The program, weekly lessons and
+				<p>I’m an adjunct professor (<em>profesor ocasional</em>) at UNAL, where I teach the Intelligent Systems course. The program, weekly lessons and
 				workshops are public at <a href="${LINKS.course}" target="_blank" rel="noopener">introsistemasinteligentes.com</a>.</p>
 				<p>Before that I was a teaching assistant for the first programming course.</p>`,
 		},
@@ -104,7 +104,7 @@ export const SECTIONS = [
 			label: 'Docencia',
 			title: 'Introducción a los Sistemas Inteligentes',
 			body: `
-				<p>De vez en cuando dicto el curso de Sistemas Inteligentes en la UNAL. El programa, las clases de cada semana
+				<p>Soy profesor ocasional en la UNAL, donde dicto el curso de Sistemas Inteligentes. El programa, las clases de cada semana
 				y los talleres están en <a href="${LINKS.course}" target="_blank" rel="noopener">introsistemasinteligentes.com</a>.</p>
 				<p>Antes fui monitor del primer curso de programación.</p>`,
 		},
