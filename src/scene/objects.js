@@ -24,7 +24,7 @@ import {
 	RingGeometry,
 	MeshPhysicalNodeMaterial,
 } from 'three/webgpu';
-import { texture, uv, time, sin, fract, smoothstep, float, vec3, luminance, hash, floor, step, color } from 'three/tsl';
+import { texture, uv, time, sin, fract, smoothstep, float, vec3, min, hash, floor, step, color, fwidth } from 'three/tsl';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { PALETTE, laptopScreen, terminalScreen, whiteboardTexture, phoneScreen, rng } from './textures.js';
 
@@ -44,19 +44,21 @@ const M = {
 	darkChrome: mat('#8b979c', 0.2, 1),
 };
 
-// Monitor screen as a small TSL shader: scanlines, a slow band rolling down, a touch of flicker,
-// darker corners, and bright text pushed above 1.0 so the bloom pass gives it a phosphor glow.
+// Monitor screen as a small TSL shader over the light terminal: faint scanlines, a slow band rolling
+// down, a touch of flicker and slightly darker corners. Kept at or under 1.0 so it doesn't bloom.
 function crtMaterial(map) {
 	const m = new MeshStandardNodeMaterial({ roughness: 0.3 });
 	const tex = texture(map, uv());
-	const scan = sin(uv().y.mul(Math.PI * 2 * 150)).mul(0.5).add(0.5).mul(0.3).add(0.7);
-	const band = smoothstep(0.93, 1.0, fract(uv().y.add(time.mul(0.13)))).mul(0.1);
-	const flicker = sin(time.mul(113.0)).mul(0.015).add(0.985);
+	// scanlines fade out when a line is thinner than ~a pixel on screen, so there's no moiré from afar
+	const lines = uv().y.mul(150);
+	const fade = float(1).sub(smoothstep(0.25, 0.6, fwidth(lines)));
+	const scan = sin(lines.mul(Math.PI * 2)).mul(0.5).add(0.5).mul(0.07).mul(fade).add(float(1).sub(fade.mul(0.07)));
+	const band = smoothstep(0.9, 1.0, fract(uv().y.add(time.mul(0.13)))).mul(0.05);
+	const flicker = sin(time.mul(113.0)).mul(0.01).add(0.99);
 	const d = uv().sub(0.5).length();
-	const vignette = float(1).sub(d.mul(d).mul(1.1));
-	const phosphor = tex.rgb.mul(float(1).add(luminance(tex.rgb).pow(2).mul(1.4)));
+	const vignette = float(1).sub(d.mul(d).mul(0.5));
 	m.colorNode = vec3(0);
-	m.emissiveNode = phosphor.mul(scan).mul(vignette).mul(flicker).add(band);
+	m.emissiveNode = min(tex.rgb.mul(scan).mul(vignette).mul(flicker).sub(band), 0.98);
 	return m;
 }
 

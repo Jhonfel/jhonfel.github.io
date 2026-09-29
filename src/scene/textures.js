@@ -319,19 +319,19 @@ export function terminalScreen() {
 	const total = script.reduce((a, [, s]) => a + s.length + 8, 0);
 	let last = '';
 	function draw(chars, blink) {
-		screenFrame(g, 1024, 768, 'foot — ~/sunshine-hyprland-virtual-display', true);
+		screenFrame(g, 1024, 768, 'foot — ~/sunshine-hyprland-virtual-display');
 		g.font = `26px ${MONO}`;
 		let left = chars;
 		let y = 100;
 		for (const [prompt, text] of script) {
 			if (left <= 0) break;
 			const shown = prompt ? text.slice(0, Math.max(0, left)) : left >= text.length ? text : '';
-			g.fillStyle = PALETTE.peach;
+			g.fillStyle = PALETTE.amber;
 			g.fillText(prompt, 30, y);
-			g.fillStyle = prompt ? '#e2f6fa' : text.startsWith('[info]') ? '#6fe0d2' : '#8fb3bd';
+			g.fillStyle = prompt ? PALETTE.ink : text.startsWith('[info]') ? PALETTE.teal : '#5d7178';
 			g.fillText(shown, 30 + g.measureText(prompt).width, y);
 			if (blink && (left < text.length + 8 || !text)) {
-				g.fillStyle = '#6fe0d2';
+				g.fillStyle = PALETTE.teal;
 				g.fillRect(30 + g.measureText(prompt + shown).width + 4, y - 22, 14, 28);
 			}
 			left -= text.length + 8;
