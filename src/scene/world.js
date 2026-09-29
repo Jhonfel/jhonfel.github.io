@@ -32,7 +32,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { PALETTE, tileTexture, hudWallTexture, rng } from './textures.js';
 import { createArm } from './arm.js';
-import { BUILDERS, metalUpa, nixieClock, skateboard } from './objects.js';
+import { BUILDERS, metalUpa, nixieClock, skateboard, cds } from './objects.js';
 
 const HOME = { pos: new Vector3(-0.2, 1.4, 3.05), look: new Vector3(-0.22, 0.16, -0.2) };
 const BENCH = { w: 3.5, d: 1.55, top: 0 };
@@ -178,7 +178,7 @@ export async function createWorld(canvas, sections, { onHover, onSelect, reduced
 		items.push(item);
 	}
 	// decorative props: clickable, but they don't open a section
-	const props = { upa: metalUpa(), nixie: nixieClock(), skate: skateboard() };
+	const props = { upa: metalUpa(), nixie: nixieClock(), skate: skateboard(), cds: cds() };
 	for (const [id, prop] of Object.entries(props)) {
 		prop.group.traverse((o) => (o.userData.section = id));
 		scene.add(prop.group);

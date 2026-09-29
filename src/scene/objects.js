@@ -21,6 +21,8 @@ import {
 	Vector3,
 	Color,
 	Matrix4,
+	RingGeometry,
+	MeshPhysicalNodeMaterial,
 } from 'three/webgpu';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { PALETTE, laptopScreen, terminalScreen, whiteboardTexture, phoneScreen, rng } from './textures.js';
@@ -645,6 +647,100 @@ export function skateboard() {
 					flipAge = -1;
 				}
 			}
+		},
+	};
+}
+
+// A stack of CDs in the empty corner of the bench. Spines and covers are just band names on colour,
+// not the real artwork. Clicking spins the loose disc.
+const CDS = [
+	{ band: 'NOFX', bg: '#141414', fg: '#f2f2f2', accent: '#d62828' },
+	{ band: 'BELVEDERE', bg: '#b3261e', fg: '#ffffff', accent: '#1a1a1a' },
+	{ band: 'NO TE VA GUSTAR', bg: '#e9b949', fg: '#1d1d1d', accent: '#2b6677' },
+	{ band: 'SONATA ARCTICA', bg: '#1e3f66', fg: '#dbe9f7', accent: '#8fc1e3' },
+];
+
+function cdInsert({ band, bg, fg, accent }) {
+	const spine = document.createElement('canvas');
+	spine.width = 512;
+	spine.height = 48;
+	let g = spine.getContext('2d');
+	g.fillStyle = bg;
+	g.fillRect(0, 0, 512, 48);
+	g.fillStyle = fg;
+	g.font = '600 30px Jost, sans-serif';
+	g.textBaseline = 'middle';
+	g.fillText(band, 18, 26);
+	g.fillStyle = accent;
+	g.fillRect(470, 12, 24, 24);
+
+	const cover = document.createElement('canvas');
+	cover.width = cover.height = 256;
+	g = cover.getContext('2d');
+	g.fillStyle = bg;
+	g.fillRect(0, 0, 256, 256);
+	g.fillStyle = accent;
+	g.fillRect(0, 200, 256, 14);
+	g.fillStyle = fg;
+	g.font = `600 ${band.length > 10 ? 26 : 40}px Jost, sans-serif`;
+	g.textAlign = 'center';
+	const words = band.length > 10 ? band.split(' ') : [band];
+	words.forEach((w, i) => g.fillText(w, 128, 110 + (i - (words.length - 1) / 2) * 32));
+
+	const tex = (c) => {
+		const t = new CanvasTexture(c);
+		t.colorSpace = SRGBColorSpace;
+		return t;
+	};
+	return { spine: tex(spine), cover: tex(cover) };
+}
+
+export function cds() {
+	const g = new Group();
+	const W = 0.125; // spine length (x)
+	const D = 0.142; // depth (z)
+	const H = 0.0104;
+	const plastic = new MeshStandardNodeMaterial({ color: '#ffffff', roughness: 0.05, transparent: true, opacity: 0.28, depthWrite: false });
+	const tray = mat('#1f2224', 0.5);
+	const r = rng(12);
+	CDS.forEach((cd, i) => {
+		const { spine, cover } = cdInsert(cd);
+		const c = new Group();
+		c.position.y = H / 2 + i * H;
+		c.rotation.y = (r() - 0.5) * 0.25;
+		c.position.x = (r() - 0.5) * 0.012;
+		// insert: +z face is the spine facing out, +y the cover (CanvasTexture on a plane reads correctly)
+		c.add(mesh(new BoxGeometry(W - 0.004, H - 0.002, D - 0.004), tray, { shadow: false }));
+		c.add(mesh(new PlaneGeometry(W - 0.006, H - 0.003), mat('#fff', 0.5, 0, { map: spine }), { pos: [0, 0, D / 2 - 0.0015], shadow: false }));
+		c.add(mesh(new PlaneGeometry(W - 0.012, D - 0.02), mat('#fff', 0.5, 0, { map: cover }), { pos: [0.003, H / 2 - 0.0009, 0], rot: [-Math.PI / 2, 0, 0], shadow: false }));
+		c.add(mesh(new BoxGeometry(W, H, D), plastic));
+		g.add(c);
+	});
+	// a loose disc, data side up
+	const discMat = new MeshPhysicalNodeMaterial({
+		color: '#eef1f3',
+		metalness: 0.6,
+		roughness: 0.22,
+		iridescence: 1,
+		iridescenceIOR: 1.8,
+		iridescenceThicknessRange: [200, 900],
+		side: DoubleSide,
+	});
+	const disc = new Group();
+	disc.position.set(0.12, 0.0015, 0.06);
+	disc.add(mesh(new RingGeometry(0.0075, 0.06, 96), discMat, { rot: [-Math.PI / 2, 0, 0] }));
+	disc.add(mesh(new RingGeometry(0.0075, 0.017, 48), mat('#eef1f2', 0.2, 0, { transparent: true, opacity: 0.6, side: DoubleSide }), { pos: [0, 0.0003, 0], rot: [-Math.PI / 2, 0, 0], shadow: false }));
+	g.add(disc);
+
+	let spin = 0;
+	return {
+		group: place(g, [-1.02, 0, 0.56], 0.12),
+		poke() {
+			spin = 40;
+		},
+		update(t, dt) {
+			spin *= Math.exp(-dt * 0.5);
+			disc.rotation.y += spin * dt;
 		},
 	};
 }
