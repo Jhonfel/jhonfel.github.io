@@ -145,6 +145,38 @@ export const SECTIONS = [
 		},
 	},
 	{
+		id: 'pulmonology',
+		object: 'stethoscope',
+		en: {
+			label: 'Pediatric pulmonology',
+			title: 'Pediatric pulmonology',
+			body: `
+				<p>Awards at the Congreso Colombiano de Neumología Pediátrica (Colombian Congress of Pediatric Pulmonology):</p>
+				<ul class="projects">
+					<li><strong>2026 · Best poster</strong>
+					<span>Normal acid–base values in children living at high altitude, and a visual application for their interpretation.</span></li>
+					<li><strong>2024 · Second place</strong>
+					<span>Prediction equations for impulse oscillometry.</span></li>
+				</ul>
+				<p>The oscillometry work was also presented at the ATS 2025 International Conference:
+				<a href="https://academic.oup.com/ajrccm/article/211/Supplement_1/A3651/8333097" target="_blank" rel="noopener">abstract in AJRCCM</a>.</p>`,
+		},
+		es: {
+			label: 'Neumología pediátrica',
+			title: 'Neumología pediátrica',
+			body: `
+				<p>Premios en el Congreso Colombiano de Neumología Pediátrica:</p>
+				<ul class="projects">
+					<li><strong>2026 · Mejor póster</strong>
+					<span>Valores normales de estado ácido-base en niños residentes a gran altura y aplicación visual para su interpretación.</span></li>
+					<li><strong>2024 · Segundo lugar</strong>
+					<span>Ecuaciones de predicción para oscilometría de impulso.</span></li>
+				</ul>
+				<p>El trabajo de oscilometría también se presentó en el congreso internacional de la ATS 2025:
+				<a href="https://academic.oup.com/ajrccm/article/211/Supplement_1/A3651/8333097" target="_blank" rel="noopener">abstract en AJRCCM</a>.</p>`,
+		},
+	},
+	{
 		id: 'projects',
 		object: 'monitor',
 		en: {
