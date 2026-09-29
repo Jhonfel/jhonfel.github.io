@@ -444,39 +444,110 @@ function samibot() {
 
 // Nixie clock at the foot of the monitor, like the one under my real screen. Shows the visitor's local time;
 // clicking it runs the digit cycle real nixie clocks use against cathode poisoning.
+// Nixie cathodes are bent wire, not a typeface. These are traced after the IN-14 style: a tall oval 0,
+// a flat-topped 3, an open 4, a 5 with a straight back, 6 and 9 with long curved tails.
+// Coordinates are in a 0..1 box (x right, y down).
+const NIXIE_GLYPHS = {
+	0: (g) => g.ellipse(0.5, 0.5, 0.36, 0.48, 0, 0, Math.PI * 2),
+	1: (g) => {
+		g.moveTo(0.34, 0.14);
+		g.lineTo(0.52, 0.02);
+		g.lineTo(0.52, 0.98);
+	},
+	2: (g) => {
+		g.moveTo(0.16, 0.26);
+		g.bezierCurveTo(0.16, -0.04, 0.86, -0.04, 0.84, 0.28);
+		g.bezierCurveTo(0.82, 0.5, 0.3, 0.72, 0.14, 0.98);
+		g.lineTo(0.86, 0.98);
+	},
+	3: (g) => {
+		g.moveTo(0.16, 0.02);
+		g.lineTo(0.84, 0.02);
+		g.lineTo(0.44, 0.4);
+		g.bezierCurveTo(0.98, 0.36, 0.98, 1.02, 0.5, 0.98);
+		g.bezierCurveTo(0.3, 0.97, 0.18, 0.9, 0.14, 0.8);
+	},
+	4: (g) => {
+		g.moveTo(0.66, 0.98);
+		g.lineTo(0.66, 0.02);
+		g.lineTo(0.12, 0.7);
+		g.lineTo(0.88, 0.7);
+	},
+	5: (g) => {
+		g.moveTo(0.82, 0.02);
+		g.lineTo(0.24, 0.02);
+		g.lineTo(0.2, 0.44);
+		g.bezierCurveTo(0.5, 0.3, 0.9, 0.42, 0.86, 0.7);
+		g.bezierCurveTo(0.82, 1.02, 0.28, 1.04, 0.14, 0.82);
+	},
+	6: (g) => {
+		g.moveTo(0.78, 0.06);
+		g.bezierCurveTo(0.42, 0.14, 0.12, 0.44, 0.14, 0.7);
+		g.ellipse(0.5, 0.72, 0.36, 0.26, 0, Math.PI, Math.PI * 3);
+	},
+	7: (g) => {
+		g.moveTo(0.14, 0.02);
+		g.lineTo(0.86, 0.02);
+		g.bezierCurveTo(0.6, 0.3, 0.42, 0.6, 0.38, 0.98);
+	},
+	8: (g) => {
+		g.ellipse(0.5, 0.25, 0.27, 0.23, 0, 0, Math.PI * 2);
+		g.moveTo(0.86, 0.72);
+		g.ellipse(0.5, 0.72, 0.36, 0.26, 0, 0, Math.PI * 2);
+	},
+	9: (g) => {
+		g.ellipse(0.5, 0.28, 0.36, 0.26, 0, 0, Math.PI * 2);
+		g.moveTo(0.86, 0.3);
+		g.bezierCurveTo(0.88, 0.56, 0.58, 0.86, 0.22, 0.94);
+	},
+};
+
 function nixieDigit() {
+	const W = 192;
+	const H = 320;
 	const c = document.createElement('canvas');
-	c.width = 96;
-	c.height = 160;
+	c.width = W;
+	c.height = H;
 	const g = c.getContext('2d');
 	const tex = new CanvasTexture(c);
 	tex.colorSpace = SRGBColorSpace;
+	// glyph box inside the canvas
+	const box = { x: W * 0.2, y: H * 0.12, w: W * 0.6, h: H * 0.76 };
+	const trace = (d) => {
+		g.save();
+		g.translate(box.x, box.y);
+		g.scale(box.w, box.h);
+		g.beginPath();
+		NIXIE_GLYPHS[d](g);
+		g.restore();
+	};
 	let shown = null;
 	return {
 		tex,
 		set(d) {
 			if (d === shown) return;
 			shown = d;
-			g.clearRect(0, 0, 96, 160);
 			g.fillStyle = '#000';
-			g.fillRect(0, 0, 96, 160);
-			g.font = '300 128px Jost, sans-serif';
-			g.textAlign = 'center';
-			g.textBaseline = 'middle';
-			g.lineWidth = 3;
+			g.fillRect(0, 0, W, H);
+			g.lineCap = g.lineJoin = 'round';
 			// the unlit cathodes stacked behind
-			g.strokeStyle = 'rgba(255,140,60,.1)';
-			for (const n of '0123456789') g.strokeText(n, 48, 84);
-			// the lit one
-			g.shadowColor = '#ff6a1a';
-			g.shadowBlur = 14;
-			g.strokeStyle = '#ff7f30';
-			g.lineWidth = 6;
-			g.strokeText(d, 48, 84);
+			g.strokeStyle = 'rgba(255,140,60,.09)';
+			g.lineWidth = 3;
+			for (let n = 0; n < 10; n++) {
+				trace(n);
+				g.stroke();
+			}
+			// the lit one: orange glow around a hot core
+			trace(d);
+			g.shadowColor = '#ff5a10';
+			g.shadowBlur = 22;
+			g.strokeStyle = '#ff7a2a';
+			g.lineWidth = 9;
+			g.stroke();
 			g.shadowBlur = 0;
-			g.strokeStyle = '#ffc89a';
-			g.lineWidth = 2;
-			g.strokeText(d, 48, 84);
+			g.strokeStyle = '#ffd0a0';
+			g.lineWidth = 3;
+			g.stroke();
 			tex.needsUpdate = true;
 		},
 	};
@@ -520,12 +591,12 @@ export function nixieClock() {
 		digits.push(d);
 	}
 	const colons = [];
-	for (const x of [-0.058, 0.054])
-		for (const y of [0.05, 0.072]) {
-			const dot = mesh(new SphereGeometry(0.0035, 12, 8), neon, { pos: [x, y, 0], shadow: false });
-			g.add(dot);
-			colons.push(dot);
-		}
+	// a single neon dot between hours, minutes and seconds, down at the digits' baseline
+	for (const x of [-0.058, 0.054]) {
+		const dot = mesh(new SphereGeometry(0.0033, 12, 8), neon, { pos: [x, 0.043, 0.006], shadow: false });
+		g.add(dot);
+		colons.push(dot);
+	}
 
 	let cycleUntil = -1;
 	let clock = 0;
