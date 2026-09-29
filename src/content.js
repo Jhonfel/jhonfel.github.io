@@ -62,7 +62,11 @@ export const SECTIONS = [
 			label: 'Work',
 			title: 'ML Engineer at MercadoLibre',
 			body: `
-				<p>I joined MercadoLibre as a DS Engineer, moved to Data Engineering and now work on machine learning.</p>
+				<ul>
+					<li><strong>ML Engineer</strong> on the Research &amp; Acceleration team (current).</li>
+					<li><strong>Data Engineer</strong> on the cloud cost forecasting team, to go deeper on the technical path.</li>
+					<li><strong>DS Engineer</strong> on the OneClick team, where I started.</li>
+				</ul>
 				<h3>Before</h3>
 				<ul>
 					<li><strong>Senior NLP Engineer at Millenium BPO</strong>: chatbots and voicebots running in production.</li>
@@ -73,7 +77,11 @@ export const SECTIONS = [
 			label: 'Trabajo',
 			title: 'ML Engineer en MercadoLibre',
 			body: `
-				<p>Entré a MercadoLibre como DS Engineer, pasé a Data Engineering y ahora trabajo en machine learning.</p>
+				<ul>
+					<li><strong>ML Engineer</strong> en el equipo de Research &amp; Acceleration (actual).</li>
+					<li><strong>Data Engineer</strong> en el equipo de forecast de costos de cloud, para profundizar en el camino técnico.</li>
+					<li><strong>DS Engineer</strong> en el equipo de OneClick, donde empecé.</li>
+				</ul>
 				<h3>Antes</h3>
 				<ul>
 					<li><strong>Senior NLP Engineer en Millenium BPO</strong>: chatbots y voicebots en producción.</li>
