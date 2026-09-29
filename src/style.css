@@ -600,3 +600,14 @@ body.no3d .panel {
 		transition: max-width 0.35s, opacity 0.35s;
 	}
 }
+
+.panel video {
+	display: block;
+	width: min(100%, 260px);
+	aspect-ratio: 360 / 648;
+	margin: 18px auto 4px;
+	border-radius: 18px;
+	background: var(--bg);
+	box-shadow: var(--neu-sm);
+	object-fit: cover;
+}

@@ -189,7 +189,7 @@ export const SECTIONS = [
 			title: 'Mechatronics & robotics',
 			body: `
 				<p>Mechatronics engineer by training. Robotics is where I started, and it’s the reason there is
-				a soldering iron on this bench; SamiBot, the startup I co-founded, came out of that.</p>
+				a soldering iron and a robot arm on this bench.</p>
 				<p>These days the hardware is mostly my own machine: an Arch + Hyprland setup that I keep patching,
 				which is how the HDR streaming project happened.</p>`,
 		},
@@ -197,10 +197,34 @@ export const SECTIONS = [
 			label: 'Hardware',
 			title: 'Mecatrónica y robótica',
 			body: `
-				<p>Soy ingeniero mecatrónico. Empecé por la robótica y por eso hay un cautín en este banco;
-				de ahí salió SamiBot, la startup que cofundé.</p>
+				<p>Soy ingeniero mecatrónico. Empecé por la robótica y por eso hay un cautín y un brazo robótico
+				en este banco.</p>
 				<p>Hoy el hardware es sobre todo mi propia máquina: un Arch + Hyprland que no paro de parchear,
 				y así nació el proyecto de streaming con HDR.</p>`,
+		},
+	},
+	{
+		id: 'samibot',
+		object: 'samibot',
+		en: {
+			label: 'SamiBot',
+			title: 'SamiBot',
+			body: `
+				<p>I co-founded SamiBot, a robotics startup that built waiter robots: three trays, a screen on top,
+				and it drives the dishes from the kitchen to the table on its own.</p>
+				<p>The little one driving around the corner of the bench is a scale model. This is the real one:</p>
+				<video src="${import.meta.env.BASE_URL}video/samibot.mp4" poster="${import.meta.env.BASE_URL}video/samibot.jpg"
+					autoplay muted loop playsinline preload="none" aria-label="SamiBot delivering a plate"></video>`,
+		},
+		es: {
+			label: 'SamiBot',
+			title: 'SamiBot',
+			body: `
+				<p>Cofundé SamiBot, una startup de robótica que hacía robots meseros: tres bandejas, una pantalla arriba,
+				y lleva solo los platos de la cocina a la mesa.</p>
+				<p>El pequeño que da vueltas en la esquina del banco es una maqueta. Este es el de verdad:</p>
+				<video src="${import.meta.env.BASE_URL}video/samibot.mp4" poster="${import.meta.env.BASE_URL}video/samibot.jpg"
+					autoplay muted loop playsinline preload="none" aria-label="SamiBot entregando un plato"></video>`,
 		},
 	},
 	{

@@ -34,7 +34,7 @@ import { PALETTE, tileTexture, hudWallTexture, rng } from './textures.js';
 import { createArm } from './arm.js';
 import { BUILDERS, metalUpa } from './objects.js';
 
-const HOME = { pos: new Vector3(-0.3, 1.45, 2.95), look: new Vector3(-0.32, 0.3, -0.2) };
+const HOME = { pos: new Vector3(-0.2, 1.45, 2.95), look: new Vector3(-0.22, 0.3, -0.2) };
 const BENCH = { w: 3.5, d: 1.55, top: 0 };
 
 export async function createWorld(canvas, sections, { onHover, onSelect, reducedMotion }) {

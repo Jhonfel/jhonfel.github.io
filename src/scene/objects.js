@@ -7,6 +7,8 @@ import {
 	TorusGeometry,
 	PlaneGeometry,
 	TubeGeometry,
+	LatheGeometry,
+	Vector2,
 	CatmullRomCurve3,
 	MeshStandardNodeMaterial,
 	TextureLoader,
@@ -63,7 +65,7 @@ function photo() {
 	g.add(mesh(new PlaneGeometry(0.24, 0.24), mat('#fff', 0.6, 0, { map: tex }), { pos: [0, 0.22, 0.016], shadow: false }));
 	g.add(mesh(new BoxGeometry(0.24, 0.04, 0.002), M.peach, { pos: [0, 0.07, 0.016], shadow: false }));
 	g.add(mesh(new BoxGeometry(0.03, 0.3, 0.02), M.clayMatte, { pos: [0, 0.14, -0.08], rot: [-0.45, 0, 0] }));
-	return { group: place(g, [1.35, 0, 0.12], -0.45), view: { pos: [0.9, 0.45, 0.95], look: [1.33, 0.2, 0.12] } };
+	return { group: place(g, [1.46, 0, -0.5], -0.35), view: { pos: [1.2, 0.5, 0.25], look: [1.44, 0.2, -0.5] } };
 }
 
 function laptop() {
@@ -222,6 +224,62 @@ function phone() {
 	return { group: place(g, [0.1, 0, 0.58], -0.5), view: { pos: [0.1, 0.6, 1.1], look: [0.1, 0.0, 0.55] } };
 }
 
+// SamiBot: the waiter robot from the startup I co-founded. White body, three trays with LED strips,
+// a rear column and a lid on top. It drives a small loop in its corner carrying a plate and a cup.
+function samibot() {
+	const g = new Group();
+	const body = new Group();
+	g.add(body);
+	const led = new MeshStandardNodeMaterial({ color: '#fff', emissive: '#4fd6e8', emissiveIntensity: 2.2, roughness: 0.3 });
+	const ledWarm = new MeshStandardNodeMaterial({ color: '#fff', emissive: '#ffae6b', emissiveIntensity: 2.2, roughness: 0.3 });
+
+	// base: rounded drum
+	const profile = [
+		[0, 0], [0.07, 0], [0.078, 0.006], [0.08, 0.02], [0.08, 0.09], [0.074, 0.105], [0, 0.105],
+	].map(([x, y]) => new Vector2(x, y));
+	body.add(mesh(new LatheGeometry(profile, 48), M.clay));
+	body.add(mesh(rbox(0.05, 0.035, 0.01, 0.004), M.ink, { pos: [0, 0.045, 0.076] }));
+	body.add(mesh(new TorusGeometry(0.079, 0.0025, 8, 64), led, { pos: [0, 0.012, 0], rot: [Math.PI / 2, 0, 0], shadow: false }));
+
+	// rear column, slightly curved like the real one
+	const spine = new CatmullRomCurve3([[0, 0.1, -0.058], [0, 0.22, -0.066], [0, 0.34, -0.058]].map((p) => new Vector3(...p)));
+	body.add(mesh(new TubeGeometry(spine, 20, 0.022, 16), M.clay));
+
+	// trays: white rim, dark top, LED strip on the front edge
+	const trayProfile = [[0, 0], [0.07, 0], [0.078, 0.004], [0.078, 0.01], [0, 0.01]].map(([x, y]) => new Vector2(x, y));
+	[0.15, 0.225, 0.3].forEach((y, i) => {
+		body.add(mesh(new LatheGeometry(trayProfile, 48), M.clay, { pos: [0, y, 0] }));
+		body.add(mesh(new CylinderGeometry(0.068, 0.068, 0.002, 48), M.ink, { pos: [0, y + 0.011, 0] }));
+		const strip = mesh(new TorusGeometry(0.078, 0.002, 6, 32, Math.PI * 0.7), i === 1 ? ledWarm : led, { shadow: false });
+		strip.position.y = y + 0.002;
+		strip.rotation.set(Math.PI / 2, 0, Math.PI * 0.15);
+		body.add(strip);
+	});
+
+	// lid with a camera
+	body.add(mesh(rbox(0.13, 0.03, 0.15, 0.012), M.clay, { pos: [0, 0.355, 0.005] }));
+	body.add(mesh(new SphereGeometry(0.008, 16, 8), M.ink, { pos: [0, 0.358, 0.08] }));
+
+	// cargo on the middle tray
+	body.add(mesh(new CylinderGeometry(0.035, 0.028, 0.006, 32), mat('#fff', 0.3), { pos: [-0.012, 0.239, 0.01] }));
+	body.add(mesh(new CylinderGeometry(0.02, 0.018, 0.012, 24), M.amber, { pos: [-0.012, 0.248, 0.01] }));
+	body.add(mesh(new CylinderGeometry(0.012, 0.01, 0.035, 20), M.clay, { pos: [0.042, 0.254, -0.02] }));
+
+	g.scale.setScalar(1.3);
+	const center = new Vector3(1.2, 0, 0.26);
+	return {
+		group: place(g, center.toArray()),
+		view: { pos: [0.95, 0.62, 1.05], look: [1.2, 0.22, 0.26] },
+		update(t) {
+			// slow ellipse, facing where it's going, with a little bob on the trays
+			const a = t * 0.25;
+			g.position.set(center.x + Math.sin(a) * 0.07, 0, center.z + Math.cos(a) * 0.12);
+			g.rotation.y = Math.atan2(Math.cos(a) * 0.07, -Math.sin(a) * 0.12);
+			body.rotation.z = Math.sin(t * 6) * 0.004;
+		},
+	};
+}
+
 // Metal Upa, the chrome capsule toy from STEINS;GATE. Decoration; it wobbles when clicked.
 export function metalUpa() {
 	const g = new Group();
@@ -237,7 +295,7 @@ export function metalUpa() {
 	g.add(body);
 	let wobble = 0;
 	return {
-		group: place(g, [1.05, 0, 0.5], -0.6),
+		group: place(g, [0.84, 0, 0.64], -0.5),
 		poke() {
 			wobble = 1;
 		},
@@ -249,4 +307,4 @@ export function metalUpa() {
 	};
 }
 
-export const BUILDERS = { photo, laptop, board: whiteboard, books, monitor, stethoscope, pcb, phone };
+export const BUILDERS = { photo, laptop, board: whiteboard, books, monitor, stethoscope, pcb, samibot, phone };
