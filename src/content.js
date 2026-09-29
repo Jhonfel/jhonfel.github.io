@@ -44,9 +44,7 @@ export const SECTIONS = [
 			body: `
 				<p>ML Engineer at <strong>MercadoLibre</strong>, occasional professor and PhD student at
 				<strong>Universidad Nacional de Colombia</strong>.</p>
-				<p>I trained as a mechatronics engineer, so I tend to end up somewhere between models, code and hardware.
-				This bench is roughly what my desk looks like: a laptop, a board with blinking LEDs, too many books
-				and a robot arm that never stays still.</p>`,
+				<p>Mechatronics engineer from Universidad Nacional de Colombia.</p>`,
 		},
 		es: {
 			label: 'Sobre mí',
@@ -54,9 +52,7 @@ export const SECTIONS = [
 			body: `
 				<p>ML Engineer en <strong>MercadoLibre</strong>, profesor ocasional y estudiante de doctorado en la
 				<strong>Universidad Nacional de Colombia</strong>.</p>
-				<p>Me formé como ingeniero mecatrónico, así que casi siempre termino en algún punto entre modelos, código y hardware.
-				Este banco se parece bastante a mi escritorio: un portátil, una placa con LEDs, demasiados libros
-				y un brazo robótico que nunca se queda quieto.</p>`,
+				<p>Ingeniero mecatrónico de la Universidad Nacional de Colombia.</p>`,
 		},
 	},
 	{
@@ -66,8 +62,7 @@ export const SECTIONS = [
 			label: 'Work',
 			title: 'ML Engineer at MercadoLibre',
 			body: `
-				<p>I joined MercadoLibre as a DS Engineer, moved to Data Engineering and now work on machine learning.
-				Going through the whole path, from pipelines to models in production, is what I enjoy the most about it.</p>
+				<p>I joined MercadoLibre as a DS Engineer, moved to Data Engineering and now work on machine learning.</p>
 				<h3>Before</h3>
 				<ul>
 					<li><strong>Senior NLP Engineer at Millenium BPO</strong>: chatbots and voicebots running in production.</li>
@@ -78,8 +73,7 @@ export const SECTIONS = [
 			label: 'Trabajo',
 			title: 'ML Engineer en MercadoLibre',
 			body: `
-				<p>Entré a MercadoLibre como DS Engineer, pasé a Data Engineering y ahora trabajo en machine learning.
-				Recorrer todo el camino, desde los pipelines hasta los modelos en producción, es lo que más disfruto.</p>
+				<p>Entré a MercadoLibre como DS Engineer, pasé a Data Engineering y ahora trabajo en machine learning.</p>
 				<h3>Antes</h3>
 				<ul>
 					<li><strong>Senior NLP Engineer en Millenium BPO</strong>: chatbots y voicebots en producción.</li>
@@ -116,7 +110,6 @@ export const SECTIONS = [
 			body: `
 				<p>I’m doing my PhD at Universidad Nacional de Colombia, after finishing my Master’s in
 				Systems and Computing Engineering there.</p>
-				<p>Machine learning and NLP are where most of my reading goes, which explains the stack of books.</p>
 				<h3>Publications</h3>
 				<ul class="projects pubs">
 					<li><a href="https://academic.oup.com/ajrccm/article/211/Supplement_1/A3651/8333097" target="_blank" rel="noopener">Comparison of Prediction Equations for Impulse Oscillometry: An AI-based Tool for Assisted Clinical Report</a>
@@ -132,7 +125,6 @@ export const SECTIONS = [
 			body: `
 				<p>Estoy haciendo el doctorado en la Universidad Nacional de Colombia, después de terminar allí la
 				Maestría en Ingeniería de Sistemas y Computación.</p>
-				<p>Machine learning y NLP es a donde se va casi toda mi lectura, lo que explica la pila de libros.</p>
 				<h3>Publicaciones</h3>
 				<ul class="projects pubs">
 					<li><a href="https://academic.oup.com/ajrccm/article/211/Supplement_1/A3651/8333097" target="_blank" rel="noopener">Comparison of Prediction Equations for Impulse Oscillometry: An AI-based Tool for Assisted Clinical Report</a>
@@ -203,21 +195,23 @@ export const SECTIONS = [
 		object: 'pcb',
 		en: {
 			label: 'Hardware',
-			title: 'Mechatronics & robotics',
+			title: 'Mechatronics',
 			body: `
-				<p>Mechatronics engineer by training. Robotics is where I started, and it’s the reason there is
-				a soldering iron and a robot arm on this bench.</p>
-				<p>These days the hardware is mostly my own machine: an Arch + Hyprland setup that I keep patching,
-				which is how the HDR streaming project happened.</p>`,
+				<ul>
+					<li>Mechatronics engineer, Universidad Nacional de Colombia.</li>
+					<li>President of RAS – CEIMTUN at Universidad Nacional de Colombia (2018).</li>
+					<li>Co-founder of SamiBot, a startup that built waiter robots.</li>
+				</ul>`,
 		},
 		es: {
 			label: 'Hardware',
-			title: 'Mecatrónica y robótica',
+			title: 'Mecatrónica',
 			body: `
-				<p>Soy ingeniero mecatrónico. Empecé por la robótica y por eso hay un cautín y un brazo robótico
-				en este banco.</p>
-				<p>Hoy el hardware es sobre todo mi propia máquina: un Arch + Hyprland que no paro de parchear,
-				y así nació el proyecto de streaming con HDR.</p>`,
+				<ul>
+					<li>Ingeniero mecatrónico, Universidad Nacional de Colombia.</li>
+					<li>Presidente de RAS – CEIMTUN en la Universidad Nacional de Colombia (2018).</li>
+					<li>Cofundador de SamiBot, una startup que hacía robots meseros.</li>
+				</ul>`,
 		},
 	},
 	{
