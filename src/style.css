@@ -202,8 +202,7 @@ button {
 	letter-spacing: 0.06em;
 }
 
-.sections button:hover,
-.sections button.hover {
+.sections button:hover {
 	background: var(--bg-glass);
 	box-shadow: var(--neu-sm);
 }
@@ -231,27 +230,6 @@ button {
 	transition: opacity 0.4s;
 	z-index: 1;
 	pointer-events: none;
-}
-
-.tag {
-	position: fixed;
-	pointer-events: none;
-	font-size: 0.8rem;
-	letter-spacing: 0.08em;
-	padding: 6px 12px;
-	border-radius: 12px;
-	background: var(--bg-glass);
-	box-shadow: var(--neu-sm);
-	color: var(--teal);
-	transform: translate(14px, 14px);
-	z-index: 4;
-	white-space: nowrap;
-}
-
-.tag b {
-	font-weight: 300;
-	margin-right: 0.4em;
-	color: var(--amber);
 }
 
 /* ------------------------------------------------------------- panel */
@@ -439,8 +417,7 @@ body.no3d {
 }
 
 body.no3d #scene,
-body.no3d .hint,
-body.no3d .tag {
+body.no3d .hint {
 	display: none;
 }
 

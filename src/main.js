@@ -87,31 +87,10 @@ addEventListener('keydown', (e) => {
 	if (e.key === 'Escape' && current) select(null);
 });
 
-// ---------------------------------------------------------------- hover tag
-const tag = $('tag');
-let pointer = [0, 0];
-addEventListener('pointermove', (e) => {
-	pointer = [e.clientX, e.clientY];
-	tag.style.left = `${pointer[0]}px`;
-	tag.style.top = `${pointer[1]}px`;
-});
-
-const PROPS = {
-	upa: { en: 'Metal Upa', es: 'Metal Upa' },
-	skate: { en: 'Skateboard', es: 'Skateboard' },
-};
-
+// ---------------------------------------------------------------- hover
+// Things on the bench don't announce what they are: hovering only changes the cursor.
 function onHover(id) {
-	const i = SECTIONS.findIndex((s) => s.id === id);
-	for (const b of $('nav').querySelectorAll('button')) b.classList.toggle('hover', b.dataset.id === id);
 	document.body.style.cursor = id ? 'pointer' : '';
-	if (i >= 0 && id !== current && !coarse) {
-		tag.innerHTML = `<b>${num(i)}</b>${SECTIONS[i][lang].label}`;
-		tag.hidden = false;
-	} else if (PROPS[id] && !coarse) {
-		tag.innerHTML = `<b>??.</b>${PROPS[id][lang]}`;
-		tag.hidden = false;
-	} else tag.hidden = true;
 }
 
 // ---------------------------------------------------------------- boot
