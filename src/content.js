@@ -98,7 +98,7 @@ export const SECTIONS = [
 			body: `
 				<p>I’m an adjunct professor (<em>profesor ocasional</em>) at UNAL, where I teach the Intelligent Systems course. The program, weekly lessons and
 				workshops are public at <a href="${LINKS.course}" target="_blank" rel="noopener">introsistemasinteligentes.com</a>.</p>
-				<p>Before that I was a teaching assistant for the first programming course.</p>`,
+				<p>Before that, during my Master’s, I taught the introductory programming course as a graduate instructor (<em>profesor asistente</em>).</p>`,
 		},
 		es: {
 			label: 'Docencia',
@@ -106,7 +106,7 @@ export const SECTIONS = [
 			body: `
 				<p>Soy profesor ocasional en la UNAL, donde dicto el curso de Sistemas Inteligentes. El programa, las clases de cada semana
 				y los talleres están en <a href="${LINKS.course}" target="_blank" rel="noopener">introsistemasinteligentes.com</a>.</p>
-				<p>Antes fui monitor del primer curso de programación.</p>`,
+				<p>Antes, durante la maestría, fui profesor asistente: dictaba el primer curso de programación.</p>`,
 		},
 	},
 	{
