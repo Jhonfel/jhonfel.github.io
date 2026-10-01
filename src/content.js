@@ -188,6 +188,10 @@ export const SECTIONS = [
 			title: 'Projects and contributions',
 			body: `
 				<ul class="projects">
+					<li><a href="https://github.com/Jhonfel/whisper-inference-bench" target="_blank" rel="noopener">whisper-inference-bench</a>
+					<span>Benchmark of Whisper on an RTX 5090: OpenAI's reference implementation vs the transformers recipe
+					(about 2× faster on long audio), plus SageAttention 2 and 3 as transformers attention backends, with an
+					encoder profile and all measured results.</span></li>
 					<li><a href="https://github.com/Jhonfel/documentation-rag-poc" target="_blank" rel="noopener">documentation-rag-poc</a>
 					<span>Agentic RAG for answering questions over documentation.</span></li>
 					<li><a href="https://github.com/Jhonfel/toxic-text-detection" target="_blank" rel="noopener">toxic-text-detection</a>
@@ -209,6 +213,10 @@ export const SECTIONS = [
 			title: 'Proyectos y contribuciones',
 			body: `
 				<ul class="projects">
+					<li><a href="https://github.com/Jhonfel/whisper-inference-bench" target="_blank" rel="noopener">whisper-inference-bench</a>
+					<span>Benchmark de Whisper en una RTX 5090: la implementación de referencia de OpenAI frente a la receta con
+					transformers (cerca de 2× más rápida en audio largo), más SageAttention 2 y 3 como backends de atención de
+					transformers, con el perfil del encoder y todos los resultados medidos.</span></li>
 					<li><a href="https://github.com/Jhonfel/documentation-rag-poc" target="_blank" rel="noopener">documentation-rag-poc</a>
 					<span>RAG agéntico para responder preguntas sobre documentación.</span></li>
 					<li><a href="https://github.com/Jhonfel/toxic-text-detection" target="_blank" rel="noopener">toxic-text-detection</a>
