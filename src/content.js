@@ -114,33 +114,37 @@ export const SECTIONS = [
 		object: 'books',
 		en: {
 			label: 'Research',
-			title: 'PhD student at UNAL',
+			title: 'Research and publications',
 			body: `
-				<p>I’m doing my PhD at Universidad Nacional de Colombia, after finishing my Master’s in
-				Systems and Computing Engineering there.</p>
+				<p>PhD student at Universidad Nacional de Colombia, after finishing my Master’s in Systems and Computing
+				Engineering there.</p>
 				<h3>Publications</h3>
 				<ul class="projects pubs">
 					<li><a href="https://academic.oup.com/ajrccm/article/211/Supplement_1/A3651/8333097" target="_blank" rel="noopener">Comparison of Prediction Equations for Impulse Oscillometry: An AI-based Tool for Assisted Clinical Report</a>
 					<span>C. Zhang, <strong>J.F. Delgado Salazar</strong>, L.F. Guantiva Vargas, C.E. Rodriguez-Martinez, S.M. Restrepo Gualteros.
-					<em>Am J Respir Crit Care Med</em> 211 (Suppl. 1), A3651. ATS 2025 International Conference, San Francisco.</span>
-					<span>A support tool for pediatric pulmonology: it compares 10 prediction equations for impulse oscillometry in children aged 3–18
-					and uses an agentic LLM workflow to draft the clinical report, with the recommended equation and diagnostic hypotheses.</span></li>
+					<em>Am J Respir Crit Care Med</em> 211 (Suppl. 1), A3651. Conference abstract, ATS 2025 International Conference, San Francisco.</span>
+					<span>A support tool for pediatric pulmonology. It compares 10 published prediction equations for impulse oscillometry
+					in children aged 3–18; a k-nearest-neighbours recommender trained on 1,000 synthetic data points suggests an equation,
+					an agentic workflow built with LangChain (few-shot) drafts the clinical report, and an evaluation step corrects errors
+					iteratively. The output is a PDF report with the recommended equation, a parametric analysis and diagnostic hypotheses.</span></li>
 				</ul>`,
 		},
 		es: {
 			label: 'Investigación',
-			title: 'Estudiante de doctorado en la UNAL',
+			title: 'Investigación y publicaciones',
 			body: `
-				<p>Estoy haciendo el doctorado en la Universidad Nacional de Colombia, después de terminar allí la
-				Maestría en Ingeniería de Sistemas y Computación.</p>
+				<p>Estudiante de doctorado en la Universidad Nacional de Colombia, después de terminar allí la Maestría en
+				Ingeniería de Sistemas y Computación.</p>
 				<h3>Publicaciones</h3>
 				<ul class="projects pubs">
 					<li><a href="https://academic.oup.com/ajrccm/article/211/Supplement_1/A3651/8333097" target="_blank" rel="noopener">Comparison of Prediction Equations for Impulse Oscillometry: An AI-based Tool for Assisted Clinical Report</a>
 					<span>C. Zhang, <strong>J.F. Delgado Salazar</strong>, L.F. Guantiva Vargas, C.E. Rodriguez-Martinez, S.M. Restrepo Gualteros.
-					<em>Am J Respir Crit Care Med</em> 211 (Suppl. 1), A3651. ATS 2025 International Conference, San Francisco.</span>
-					<span>Una herramienta de apoyo para neumología pediátrica: compara 10 ecuaciones de referencia de oscilometría de impulso
-					en niños de 3 a 18 años y usa un flujo agéntico con LLMs para redactar el reporte clínico, con la ecuación recomendada
-					y las hipótesis diagnósticas.</span></li>
+					<em>Am J Respir Crit Care Med</em> 211 (Suppl. 1), A3651. Resumen de congreso, ATS 2025 International Conference, San Francisco.</span>
+					<span>Una herramienta de apoyo para neumología pediátrica. Compara 10 ecuaciones de predicción publicadas para
+					oscilometría de impulso en niños de 3 a 18 años; un recomendador de k vecinos más cercanos, entrenado con 1.000 datos
+					sintéticos, sugiere una ecuación; un flujo agéntico construido con LangChain (few-shot) redacta el reporte clínico, y un
+					paso de evaluación corrige errores de forma iterativa. El resultado es un reporte en PDF con la ecuación recomendada,
+					el análisis paramétrico y las hipótesis diagnósticas.</span></li>
 				</ul>`,
 		},
 	},
@@ -181,34 +185,44 @@ export const SECTIONS = [
 		object: 'monitor',
 		en: {
 			label: 'Projects',
-			title: 'Things I’ve built',
+			title: 'Projects and contributions',
 			body: `
 				<ul class="projects">
-					<li><a href="https://github.com/Jhonfel/sunshine-hyprland-virtual-display" target="_blank" rel="noopener">sunshine-hyprland-virtual-display</a>
-					<span>Apollo-style virtual display for game streaming on Linux (Hyprland + Sunshine). It matches each client’s
-					resolution and refresh rate and does end-to-end HDR10, which needed patches to both Sunshine and Hyprland.</span></li>
 					<li><a href="https://github.com/Jhonfel/documentation-rag-poc" target="_blank" rel="noopener">documentation-rag-poc</a>
 					<span>Agentic RAG for answering questions over documentation.</span></li>
 					<li><a href="https://github.com/Jhonfel/toxic-text-detection" target="_blank" rel="noopener">toxic-text-detection</a>
 					<span>NLP classifier for toxic text.</span></li>
 					<li><a href="${LINKS.course}" target="_blank" rel="noopener">introsistemasinteligentes.com</a>
 					<span>Course site for Intelligent Systems at UNAL.</span></li>
+				</ul>
+				<h3>Open-source contributions</h3>
+				<ul class="projects">
+					<li><a href="https://github.com/jhonsnake/sunshine-hyprland-virtual-display/pull/4" target="_blank" rel="noopener">sunshine-hyprland-virtual-display · PR #4</a>
+					<span>Contribution to <a href="https://github.com/jhonsnake/sunshine-hyprland-virtual-display" target="_blank" rel="noopener">jhonsnake/sunshine-hyprland-virtual-display</a>, an
+					Apollo-style virtual display for game streaming on Linux (Hyprland + Sunshine): per-client resolution and refresh-rate
+					matching, and end-to-end HDR10 streaming, including a Hyprland screencopy patch. The Sunshine side relies on
+					<a href="https://github.com/LizardByte/Sunshine/pull/5615" target="_blank" rel="noopener">LizardByte/Sunshine#5615</a>.</span></li>
 				</ul>`,
 		},
 		es: {
 			label: 'Proyectos',
-			title: 'Cosas que he construido',
+			title: 'Proyectos y contribuciones',
 			body: `
 				<ul class="projects">
-					<li><a href="https://github.com/Jhonfel/sunshine-hyprland-virtual-display" target="_blank" rel="noopener">sunshine-hyprland-virtual-display</a>
-					<span>Pantalla virtual al estilo Apollo para hacer streaming de juegos en Linux (Hyprland + Sunshine). Ajusta la
-					resolución y la tasa de refresco a cada cliente y transmite HDR10 de punta a punta, para lo que hubo que parchear Sunshine y Hyprland.</span></li>
 					<li><a href="https://github.com/Jhonfel/documentation-rag-poc" target="_blank" rel="noopener">documentation-rag-poc</a>
 					<span>RAG agéntico para responder preguntas sobre documentación.</span></li>
 					<li><a href="https://github.com/Jhonfel/toxic-text-detection" target="_blank" rel="noopener">toxic-text-detection</a>
 					<span>Clasificador de NLP para texto tóxico.</span></li>
 					<li><a href="${LINKS.course}" target="_blank" rel="noopener">introsistemasinteligentes.com</a>
 					<span>Sitio del curso de Sistemas Inteligentes de la UNAL.</span></li>
+				</ul>
+				<h3>Contribuciones open source</h3>
+				<ul class="projects">
+					<li><a href="https://github.com/jhonsnake/sunshine-hyprland-virtual-display/pull/4" target="_blank" rel="noopener">sunshine-hyprland-virtual-display · PR #4</a>
+					<span>Contribución a <a href="https://github.com/jhonsnake/sunshine-hyprland-virtual-display" target="_blank" rel="noopener">jhonsnake/sunshine-hyprland-virtual-display</a>, una
+					pantalla virtual al estilo Apollo para hacer streaming de juegos en Linux (Hyprland + Sunshine): ajuste de resolución y
+					tasa de refresco a cada cliente, y transmisión HDR10 de punta a punta, incluido un parche de screencopy para Hyprland.
+					La parte de Sunshine usa <a href="https://github.com/LizardByte/Sunshine/pull/5615" target="_blank" rel="noopener">LizardByte/Sunshine#5615</a>.</span></li>
 				</ul>`,
 		},
 	},
